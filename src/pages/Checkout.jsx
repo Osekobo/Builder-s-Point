@@ -21,7 +21,7 @@ import {
   FiTruck,
   FiArrowLeft,
 } from "react-icons/fi";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const Checkout = () => {
   const [phone, setPhone] = useState("");
@@ -127,7 +127,7 @@ const Checkout = () => {
 
   const pollPaymentStatus = async (checkoutRequestId, maxAttempts = 15) => {
     let attempts = 0;
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8001";
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
     const poll = setInterval(async () => {
       attempts++;
       try {

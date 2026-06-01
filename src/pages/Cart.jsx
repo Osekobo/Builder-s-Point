@@ -52,7 +52,7 @@ const Cart = () => {
                   {/* Product Image */}
                   <div className="w-32 h-32 flex-shrink-0 bg-sand/20 border-2 border-black overflow-hidden">
                     <img
-                      src={item.product.image_url || 'https://placehold.co/400x400/D6B896/121518?text=Product'}
+                      src={item.product.file_image || 'https://placehold.co/400x400/D6B896/121518?text=Product'}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
                     />
