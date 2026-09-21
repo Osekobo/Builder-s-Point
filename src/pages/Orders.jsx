@@ -1,9 +1,9 @@
-// pages/Orders.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getOrders, cancelOrder as cancelOrderApi, retryPayment as retryPaymentApi } from "../api/orders";
 import toast from "react-hot-toast";
 import { logError } from "../utils/logger";
+import useProductStore from "../store/productStore";
 import {
   FaCube,
   FaCircleCheck,
@@ -13,7 +13,6 @@ import {
   FaCalendarDays,
   FaCircleExclamation,
   FaCircleXmark,
-  FaDollarSign,
   FaRotate,
 } from "react-icons/fa6";
 
@@ -60,15 +59,23 @@ const Orders = () => {
   const retryPayment = async (orderId) => {
     setProcessingOrderId(orderId);
     try {
-      await retryPaymentApi(orderId);
-      toast.success("New order created! Redirecting to checkout...");
-      navigate("/checkout");
+      const response = await retryPaymentApi(orderId);
+      toast.success("New order created! Redirecting to payment...");
+      navigate(
+        `/checkout?retry_order_id=${response.data.new_order_id}&total=${response.data.total}`,
+      );
     } catch (error) {
       logError("Error retrying payment:", error);
       toast.error(error.response?.data?.detail || "Failed to retry payment");
     } finally {
       setProcessingOrderId(null);
     }
+  };
+
+  const { products } = useProductStore();
+  const getProductName = (productId) => {
+    const product = products.find((p) => p.id === productId);
+    return product?.name || null;
   };
 
   const getStatusIcon = (status) => {
@@ -137,7 +144,6 @@ const Orders = () => {
   return (
     <div className="min-h-screen bg-warm py-8 px-4">
       <div className="container mx-auto max-w-6xl">
-        {/* Page Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
             <FaBagShopping className="w-8 h-8 text-white" />
@@ -188,13 +194,12 @@ const Orders = () => {
                 className="bg-white border-4 border-black shadow-hard-sm overflow-hidden"
               >
                 <div className="p-6">
-                  {/* Order Header */}
                   <div className="flex flex-wrap justify-between items-start gap-4 border-b-4 border-black pb-4 mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <FaCube className="w-5 h-5 text-terra" />
                         <p className="font-h font-bold text-black text-lg">
-                          Order #{order.id}
+                          Order {String(order.id).replace(/^#/, "")}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-ash">
@@ -203,7 +208,6 @@ const Orders = () => {
                           {new Date(order.created_at).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1">
-                          <FaDollarSign className="w-3 h-3" />
                           {formatMoney(order.total)}
                         </span>
                       </div>
@@ -223,7 +227,6 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  {/* Order Items */}
                   {order.items && order.items.length > 0 && (
                     <div className="mb-4">
                       <h3 className="font-h font-bold text-black uppercase text-sm mb-3">
@@ -236,8 +239,7 @@ const Orders = () => {
                             className="flex justify-between text-sm"
                           >
                             <span className="text-ash">
-                              {item.product_name ||
-                                `Product #${item.product_id}`}
+                              {item.product_name || getProductName(item.product_id) || `Product ${item.product_id}`}
                               <span className="font-bold ml-1">
                                 x {item.quantity}
                               </span>
@@ -251,7 +253,6 @@ const Orders = () => {
                     </div>
                   )}
 
-                  {/* M-Pesa Receipt */}
                   {order.mpesa_receipt && (
                     <div className="mb-4 p-3 bg-green-50 border-2 border-green-500">
                       <p className="text-sm text-green-700">
@@ -263,7 +264,6 @@ const Orders = () => {
                     </div>
                   )}
 
-                  {/* Payment Failed Message */}
                   {order.status === "payment_failed" && (
                     <div className="mb-4 p-3 bg-red-50 border-2 border-red-500">
                       <p className="text-sm text-red-700">
@@ -272,7 +272,6 @@ const Orders = () => {
                     </div>
                   )}
 
-                  {/* Cancelled Message */}
                   {order.status === "cancelled" && (
                     <div className="mb-4 p-3 bg-yellow-50 border-2 border-yellow-500">
                       <p className="text-sm text-yellow-700">
@@ -281,10 +280,8 @@ const Orders = () => {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
                   <div className="border-t-2 border-black pt-4 mt-4">
                     <div className="flex flex-wrap gap-3">
-                      {/* ✅ RETRY PAYMENT BUTTON - For cancelled or payment_failed orders */}
                       {(order.status === "cancelled" ||
                         order.status === "payment_failed") && (
                         <button
@@ -301,7 +298,6 @@ const Orders = () => {
                         </button>
                       )}
 
-                      {/* ✅ CANCEL ORDER BUTTON - Only for pending orders */}
                       {order.status === "pending" && (
                         <button
                           onClick={() => setOrderToCancel(order)}
@@ -315,7 +311,6 @@ const Orders = () => {
                         </button>
                       )}
 
-                      {/* View Order Details */}
                       <Link
                         to={`/order/${order.id}`}
                         className="px-4 py-2 bg-gray-300 text-black text-sm font-bold uppercase border-2 border-black hover:bg-gray-400 transition-all flex items-center gap-2"
@@ -342,7 +337,7 @@ const Orders = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-h text-lg font-bold text-black uppercase mb-3">
-              Cancel Order #{orderToCancel.id}?
+              Cancel Order {orderToCancel.id}?
             </h2>
             <p className="text-ash mb-6">
               Are you sure you want to cancel this order? This action cannot be

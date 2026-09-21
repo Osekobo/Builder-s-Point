@@ -123,7 +123,6 @@ const ManageProducts = () => {
       try {
         await api.delete(`/products/${id}`);
         toast.success("Product deleted successfully!");
-        // Refresh the product list
         fetchProducts();
       } catch (error) {
         logError("Error deleting product:", error);

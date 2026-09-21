@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import useCartStore from "../store/cartStore";
 import toast from "react-hot-toast";
 import {
@@ -21,23 +21,24 @@ const Checkout = () => {
   const [phone, setPhone] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [pollingRequestId, setPollingRequestId] = useState(null);
+  const [searchParams] = useSearchParams();
+  const retryOrderId = parseInt(searchParams.get("retry_order_id") || "", 10);
+  const retryTotal = parseFloat(searchParams.get("total") || "");
+  const isRetry = !Number.isNaN(retryOrderId) && retryOrderId > 0;
   const { items, total, clearCart } = useCartStore();
   const navigate = useNavigate();
-  const createdOrderIdRef = useRef(null);
-  const paymentCompletedRef = useRef(false);
+  const createdOrderIdRef = useRef(isRetry ? retryOrderId : null);
+  const paymentCompletedRef = useRef(isRetry);
 
-  // Calculate order details
   const subtotal = total;
-  const grandTotal = subtotal;
+  const grandTotal = isRetry ? retryTotal : subtotal;
 
-  // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0 && !paymentCompletedRef.current) {
       navigate("/cart");
     }
   }, [items, navigate]);
 
-  // Poll M-Pesa payment status (cleans up on unmount)
   useEffect(() => {
     if (!pollingRequestId) return;
 
@@ -52,7 +53,9 @@ const Checkout = () => {
           clearInterval(timer);
           paymentCompletedRef.current = true;
           toast.success("Payment successful! Your order has been confirmed.");
-          await clearCart();
+          if (!isRetry) {
+            await clearCart();
+          }
           navigate("/orders");
         } else if (attempts >= MAX_POLL_ATTEMPTS) {
           clearInterval(timer);
@@ -76,7 +79,7 @@ const Checkout = () => {
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [pollingRequestId, navigate, clearCart]);
+  }, [pollingRequestId, navigate, clearCart, isRetry]);
 
   const handlePayment = async () => {
     if (!useAuthStore.getState().isAuthenticated()) {
@@ -89,7 +92,7 @@ const Checkout = () => {
       return;
     }
 
-    if (!items || items.length === 0) {
+    if (!isRetry && (!items || items.length === 0)) {
       toast.error("Your cart is empty");
       return;
     }
@@ -163,7 +166,7 @@ const Checkout = () => {
     })}`;
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !isRetry) {
     return (
       <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4">
         <div className="text-center max-w-md mx-auto bg-white border-4 border-black shadow-hard-lg p-12">
@@ -234,6 +237,14 @@ const Checkout = () => {
               </div>
 
               <div className="bg-terra/5 border-2 border-terra p-4">
+                {isRetry && (
+                  <div className="mb-4 p-3 bg-yellow-50 border-2 border-yellow-500">
+                    <p className="text-sm text-yellow-700">
+                      Retrying payment for order {retryOrderId}. Enter your
+                      phone number to receive a new STK push.
+                    </p>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2 mb-3">
                   <FaCircleInfo className="w-5 h-5 text-terra" />
                   <p className="font-bold text-black">M-Pesa Instructions</p>
@@ -272,30 +283,50 @@ const Checkout = () => {
               </h2>
               <div className="brick-line mx-auto mb-6"></div>
 
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto border-b-2 border-black pb-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <div className="flex-1">
-                      <span className="font-bold text-black">
-                        {item.product?.name}
-                      </span>
-                      <span className="text-ash ml-1">x {item.quantity}</span>
-                    </div>
-                    <span className="font-bold text-terra">
-                      {formatMoney((item.product?.price || 0) * item.quantity)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-ash">Subtotal</span>
-                  <span className="font-bold text-black">
-                    {formatMoney(subtotal)}
-                  </span>
+              {isRetry ? (
+                <div className="mb-4 p-3 bg-warm/40 border-2 border-black">
+                  <p className="text-sm text-ash">
+                    Retrying payment for order:{" "}
+              <span className="font-bold text-black">
+                {retryOrderId}
+              </span>
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className="space-y-3 mb-4 max-h-64 overflow-y-auto border-b-2 border-black pb-4">
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex justify-between text-sm"
+                      >
+                        <div className="flex-1">
+                          <span className="font-bold text-black">
+                            {item.product?.name}
+                          </span>
+                          <span className="text-ash ml-1">
+                            x {item.quantity}
+                          </span>
+                        </div>
+                        <span className="font-bold text-terra">
+                          {formatMoney(
+                            (item.product?.price || 0) * item.quantity,
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-ash">Subtotal</span>
+                      <span className="font-bold text-black">
+                        {formatMoney(subtotal)}
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="border-t-2 border-black pt-4 mb-4">
                 <div className="flex justify-between text-lg font-bold">

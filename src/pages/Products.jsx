@@ -11,7 +11,6 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaEye,
-  FaMagnifyingGlass,
   FaBagShopping,
 } from "react-icons/fa6";
 import api from "../api/client";
@@ -24,11 +23,12 @@ const Products = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // State for filters and sorting
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(
+    () => searchParams.get("search") || "",
+  );
   const [selectedCategory, setSelectedCategory] = useState(
     () => searchParams.get("category") || "all",
   );
@@ -53,7 +53,6 @@ const Products = () => {
     { label: "Over KSh 50,000", min: 50000, max: 1000000 },
   ];
 
-  // Sort options matching backend
   const sortOptions = [
     { value: "newest", label: "Newest First" },
     { value: "price_asc", label: "Price: Low to High" },
@@ -64,13 +63,11 @@ const Products = () => {
     { value: "popular", label: "Most Popular" },
   ];
 
-  // Fetch categories from backend
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await api.get("/products/categories");
         const apiCategories = response.data;
-        // Transform categories to match our format
         const formattedCategories = [
           { id: "all", name: "All Products" },
           ...apiCategories.map((cat) => ({
@@ -87,16 +84,14 @@ const Products = () => {
     fetchCategories();
   }, []);
 
-  // Pick up the category from the URL (e.g. /products?category=paints
-  // from the Home "Shop by Category" cards).
   useEffect(() => {
-    const categoryParam = searchParams.get("category");
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
+    const category = searchParams.get("category") || "";
+    const search = searchParams.get("search") || "";
+    setSelectedCategory(category || "all");
+    setSearchTerm(search);
+    setCurrentPage(1);
   }, [searchParams]);
 
-  // Keep the URL in sync with the selected category so it is shareable.
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     if (selectedCategory === "all") {
@@ -104,11 +99,16 @@ const Products = () => {
     } else {
       params.set("category", selectedCategory);
     }
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    } else {
+      params.delete("search");
+    }
     const qs = params.toString();
     if (qs !== searchParams.toString()) {
       setSearchParams(params, { replace: true });
     }
-  }, [selectedCategory, searchParams, setSearchParams]);
+  }, [selectedCategory, searchTerm, searchParams, setSearchParams]);
 
   const fetchFilteredProducts = useCallback(async () => {
     try {
@@ -186,17 +186,14 @@ const Products = () => {
     setCurrentPage(1);
   };
 
-  // Get paginated products (use store products or fetched products)
   const displayProducts = products || [];
   const paginatedProducts = displayProducts;
 
-  // Calculate category counts
   const getCategoryCount = (categoryId) => {
     if (categoryId === "all") return totalProducts;
     return products?.filter((p) => p.category === categoryId).length || 0;
   };
 
-  // Loading skeleton
   if (isLoading) {
     return (
       <div className="min-h-screen bg-warm">
@@ -241,35 +238,6 @@ const Products = () => {
       </div>
 
       
-      <div className="sticky top-16 z-30 bg-warm py-4 border-b-4 border-black shadow-hard-sm">
-        <div className="mx-auto w-full max-w-[1600px] px-4">
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <FaMagnifyingGlass className="absolute left-4 top-1/2 transform -translate-y-1/2 text-ash w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search for cement, paint, tools, plumbing and more..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="w-full pl-12 pr-4 py-3 border-4 border-black focus:outline-none focus:ring-2 focus:ring-terra text-base"
-              />
-            </div>
-            {searchTerm && (
-              <div className="text-center mt-2">
-                <p className="text-sm text-ash">
-                  Found {totalProducts}{" "}
-                  {totalProducts === 1 ? "result" : "results"} for "{searchTerm}
-                  "
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       <div className="mx-auto w-full max-w-[1600px] px-3 py-3 md:px-4 md:py-4">
         
         <div className="lg:hidden mb-4 sm:mb-6">
@@ -434,10 +402,7 @@ const Products = () => {
           <div className="flex-1">
             
             <div className="bg-white border-4 border-black shadow-hard-sm p-4 mb-6">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p className="text-ash font-semibold text-sm sm:text-base">
-                  {totalProducts} {totalProducts === 1 ? "product" : "products"}
-                </p>
+              <div className="flex justify-end">
                 <div className="flex items-center space-x-4">
                   
                   <select

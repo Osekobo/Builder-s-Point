@@ -10,7 +10,6 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Clear any stale errors when login page loads
   useEffect(() => {
     clearError();
   }, [clearError]);
@@ -23,7 +22,6 @@ const Login = () => {
     }
   };
 
-  // Helper function to format error messages
   const formatErrorMessage = (error) => {
     if (!error) return null;
 

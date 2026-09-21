@@ -170,7 +170,6 @@ const Home = () => {
   const [addedToCart, setAddedToCart] = useState({});
   const [categories, setCategories] = useState([]);
 
-  // Why Choose Us data
   const whyChooseUs = [
     {
       icon: <FaTruck className="w-8 h-8" />,
@@ -204,7 +203,6 @@ const Home = () => {
     },
   ];
 
-  // Marquee text items - sliding from right to left
   const marqueeItems = [
     "Quality Building Materials",
     "Premium Paints",
@@ -217,7 +215,6 @@ const Home = () => {
     "Nairobi, Kenya",
   ];
 
-  // Categories presentation metadata (backend supplies names and real counts)
   const categoryMeta = {
     building: { name: "Building Materials", icon: FaBox },
     paints: { name: "Paints", icon: FaDroplet },
@@ -294,7 +291,6 @@ const Home = () => {
 
   const latestProducts = Array.isArray(products) ? products : [];
 
-  // ✅ Loading Skeleton - Better UX while loading
   if (isLoading && latestProducts.length === 0) {
     return (
       <div className="min-h-screen bg-warm">
@@ -337,7 +333,6 @@ const Home = () => {
     );
   }
 
-  // Double the marquee items for seamless looping
   const doubledMarqueeItems = [...marqueeItems, ...marqueeItems];
 
   return (
@@ -537,7 +532,7 @@ const Home = () => {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
             {latestProducts.map((product) => (
               <HomeProductCard
                 key={product.id}

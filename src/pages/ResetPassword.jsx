@@ -1,4 +1,3 @@
-// src/pages/ResetPassword.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaLock, FaCheck, FaArrowLeft, FaShieldHalved, FaCircleExclamation, FaCircleCheck } from 'react-icons/fa6';
@@ -54,9 +53,7 @@ const ResetPassword = () => {
       
       if (response.data.success) {
         setIsSuccess(true);
-        // Clear stored email
         sessionStorage.removeItem('reset_email');
-        // Auto redirect after 3 seconds
         setTimeout(() => {
           navigate('/login');
         }, 3000);

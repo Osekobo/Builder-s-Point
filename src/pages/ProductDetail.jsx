@@ -93,7 +93,6 @@ const ProductDetail = () => {
   const handleRelatedProductClick = (productId) => {
     navigate(`/product/${productId}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
-    // Reload the product details
     setTimeout(() => {
       fetchProductDetails();
     }, 100);
@@ -102,12 +101,10 @@ const ProductDetail = () => {
   const getProductImages = () => {
     const images = [];
 
-    // Add main product image
     if (product?.file_image) {
       images.push(getImageUrl(product.file_image));
     }
 
-    // If no images found, add placeholder
     if (images.length === 0) {
       images.push(
         `https://placehold.co/600x600/D6B896/121518?text=${(product?.name || "Product").substring(0, 15)}`,
@@ -152,7 +149,6 @@ const ProductDetail = () => {
 
   const productImages = getProductImages();
 
-  // Get category display name
   const getCategoryName = (category) => {
     const categories = {
       building: "Building Materials",
@@ -169,7 +165,6 @@ const ProductDetail = () => {
     );
   };
 
-  // Scroll related products horizontally
   const scrollRelated = (direction) => {
     const container = document.getElementById("related-products-scroll");
     if (container) {

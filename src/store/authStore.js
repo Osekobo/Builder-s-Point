@@ -1,4 +1,3 @@
-// src/store/authStore.js
 import { create } from "zustand";
 import {
   login as loginApi,
@@ -9,12 +8,10 @@ import {
 import useCartStore from "./cartStore";
 import { log, logError } from "../utils/logger";
 
-// Old persisted token-based session is no longer used (token now lives in a
-// httpOnly cookie). Clear any stale data left in localStorage.
 try {
   localStorage.removeItem("auth-storage");
-} catch {
-  // ignore storage access errors (e.g. private mode)
+} catch (e) {
+  void e;
 }
 
 const getErrorMessage = (error, fallback) => {
@@ -30,16 +27,12 @@ const useAuthStore = create((set, get) => ({
   sessionLoaded: false,
   error: null,
 
-  // Hydrate the current session from the server (cookie backed). Called once
-  // on app start so ProtectedRoute knows whether the user is authenticated.
   checkSession: async () => {
     if (get().sessionLoaded) return;
     try {
       const { data: user } = await getMe();
       set({ user, sessionLoaded: true });
     } catch (error) {
-      // 401 just means "no valid session cookie" (anonymous visitor or an
-      // expired token) — expected, so keep the console quiet.
       if (error.response?.status === 401) {
         set({ user: null, sessionLoaded: true });
         return;
@@ -76,7 +69,6 @@ const useAuthStore = create((set, get) => ({
       await registerApi(userData);
       log("✅ Registration successful");
 
-      // Auto-login after registration
       await loginApi({
         email: userData.email,
         password: userData.password,

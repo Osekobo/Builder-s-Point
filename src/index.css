@@ -46,7 +46,6 @@
 }
 
 @layer components {
-  /* Navbar component styles */
   .nav-link {
     @apply text-gray-700 hover:text-terra transition-colors duration-200;
   }
@@ -63,7 +62,6 @@
     @apply flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors;
   }
 
-  /* Sidebar menu animation */
   .sidebar-enter {
     @apply transform transition-transform duration-300 ease-out;
   }
@@ -76,7 +74,6 @@
     @apply translate-x-full;
   }
 
-  /* Cart badge */
   .cart-badge {
     @apply absolute -top-2 -right-2 bg-terra text-white text-xs rounded-full w-5 h-5 flex items-center justify-center;
   }
@@ -90,12 +87,10 @@
     overflow: hidden;
   }
 
-  /* Prevent body scroll when mobile menu is open */
   .body-no-scroll {
     @apply overflow-hidden;
   }
 
-  /* Marquee animation */
   .animate-marquee {
     animation: marquee 25s linear infinite;
   }
@@ -105,7 +100,7 @@
   }
 }
 
-/* Your existing animations and styles remain */
+
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -135,7 +130,7 @@
   animation: bounce 0.5s ease-in-out;
 }
 
-/* Marquee Keyframes */
+
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -145,12 +140,12 @@
   }
 }
 
-/* Smooth scrolling */
+
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -168,9 +163,9 @@ html {
   background: #555;
 }
 
-/* ========== RELATED PRODUCTS HORIZONTAL SCROLLBAR ========== */
 
-/* For smooth horizontal scrolling */
+
+
 #related-products-scroll {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
@@ -179,7 +174,7 @@ html {
   scrollbar-color: var(--c-terra) var(--c-sand);
 }
 
-/* Custom scrollbar for the related products section - Webkit (Chrome, Safari, Edge) */
+
 #related-products-scroll::-webkit-scrollbar {
   height: 8px;
 }
@@ -198,13 +193,13 @@ html {
   background: var(--c-terra-dark);
 }
 
-/* For Firefox */
+
 #related-products-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--c-terra) var(--c-sand);
 }
 
-/* ========== KIONE HARDWARE CUSTOM COLORS ========== */
+
 
 :root {
   --c-terra: #be7451;
@@ -215,7 +210,7 @@ html {
   --c-warm: #f8f6f2;
 }
 
-/* Background Colors */
+
 .bg-terra {
   background-color: var(--c-terra);
 }
@@ -262,7 +257,7 @@ html {
   background-color: var(--c-warm);
 }
 
-/* Text Colors */
+
 .text-terra {
   color: var(--c-terra);
 }
@@ -282,7 +277,7 @@ html {
   color: var(--c-black);
 }
 
-/* Border Colors */
+
 .border-terra {
   border-color: var(--c-terra);
 }
@@ -302,7 +297,7 @@ html {
   border-color: var(--c-black);
 }
 
-/* Hover Backgrounds */
+
 .hover\:bg-terra:hover {
   background-color: var(--c-terra);
 }
@@ -322,7 +317,7 @@ html {
   background-color: var(--c-warm);
 }
 
-/* Hover Text Colors */
+
 .hover\:text-terra:hover {
   color: var(--c-terra);
 }
@@ -336,7 +331,7 @@ html {
   color: var(--c-warm);
 }
 
-/* Focus Rings */
+
 .focus\:ring-terra:focus {
   --tw-ring-color: var(--c-terra);
 }
@@ -344,7 +339,7 @@ html {
   --tw-ring-color: var(--c-terra-dark);
 }
 
-/* Gradient Backgrounds */
+
 .from-terra {
   --tw-gradient-from: var(--c-terra);
 }
@@ -358,7 +353,7 @@ html {
   --tw-gradient-to: rgba(224, 78, 0, 0.2);
 }
 
-/* Shadow Colors */
+
 .shadow-terra {
   --tw-shadow-color: var(--c-terra);
 }
@@ -372,7 +367,7 @@ html {
   --tw-shadow-color: var(--c-black);
 }
 
-/* Ring Colors */
+
 .ring-terra {
   --tw-ring-color: var(--c-terra);
 }
@@ -380,7 +375,7 @@ html {
   --tw-ring-color: var(--c-terra-dark);
 }
 
-/* Placeholder Colors */
+
 .placeholder-terra::placeholder {
   color: var(--c-terra);
 }
@@ -388,18 +383,18 @@ html {
   color: var(--c-ash);
 }
 
-/* Selection Color */
+
 ::selection {
   background-color: var(--c-terra);
   color: white;
 }
 
-/* Focus Visible */
+
 .focus-visible\:ring-terra:focus-visible {
   --tw-ring-color: var(--c-terra);
 }
 
-/* Shared surface defaults keep legacy page markup calm and consistent. */
+
 .border-black {
   border-color: #e5ded4;
 }
@@ -446,7 +441,7 @@ textarea::placeholder {
   color: #a39a90;
 }
 
-/* Active Backgrounds */
+
 .active\:bg-terra:active {
   background-color: var(--c-terra);
 }
@@ -454,7 +449,7 @@ textarea::placeholder {
   background-color: var(--c-terra-dark);
 }
 
-/* Group Hover */
+
 .group:hover .group-hover\:bg-terra {
   background-color: var(--c-terra);
 }
@@ -471,7 +466,7 @@ textarea::placeholder {
   --tw-gradient-to: var(--c-terra-dark);
 }
 
-/* Brick Line Pattern for Kione Hardware */
+
 .brick-line {
   height: 6px;
   background: repeating-linear-gradient(
@@ -502,7 +497,7 @@ textarea::placeholder {
   margin-right: auto;
 }
 
-/* Hard Shadow Utility (like Kione's design) */
+
 .shadow-hard {
   box-shadow: 8px 8px 0 var(--c-terra);
 }
@@ -519,7 +514,7 @@ textarea::placeholder {
   box-shadow: 12px 12px 0 var(--c-terra);
 }
 
-/* Transition for hard shadow hover effects */
+
 .transition-hard {
   transition:
     transform 0.2s ease,
@@ -533,4 +528,231 @@ textarea::placeholder {
 }
 .hover\:translate-y-\[2px\]:hover {
   transform: translateY(2px);
+}
+
+/* ============================================
+   PRINT RECEIPT STYLES
+   ============================================ */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .no-print,
+  nav,
+  footer,
+  .no-print * {
+    display: none !important;
+  }
+
+  .print-receipt {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt * {
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+  }
+
+  .print-receipt .receipt-container {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    border: 2px solid #000 !important;
+    background: #fff !important;
+  }
+
+  .print-receipt .receipt-header {
+    text-align: center !important;
+    border-bottom: 3px double #000 !important;
+    padding-bottom: 15px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .print-receipt .receipt-logo {
+    font-size: 28pt !important;
+    font-weight: bold !important;
+    color: #000 !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    letter-spacing: 3px !important;
+    text-transform: uppercase !important;
+  }
+
+  .print-receipt .receipt-tagline {
+    font-size: 10pt !important;
+    color: #555 !important;
+    font-style: italic !important;
+    margin-top: 5px !important;
+  }
+
+  .print-receipt .receipt-title {
+    text-align: center !important;
+    font-size: 20pt !important;
+    font-weight: bold !important;
+    margin: 15px 0 10px 0 !important;
+    text-transform: uppercase !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-order-info {
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 15px !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  .print-receipt .receipt-order-info div {
+    flex: 1 !important;
+    min-width: 200px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .print-receipt .receipt-order-info strong {
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-section-title {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid #000 !important;
+    padding-bottom: 5px !important;
+    margin: 15px 0 10px 0 !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-items-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 15px !important;
+    font-size: 11pt !important;
+  }
+
+  .print-receipt .receipt-items-table th {
+    background: #f0f0f0 !important;
+    border: 1px solid #000 !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+    font-weight: bold !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-items-table td {
+    border: 1px solid #000 !important;
+    padding: 8px 10px !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-items-table tr:nth-child(even) td {
+    background: #fafafa !important;
+  }
+
+  .print-receipt .receipt-totals {
+    text-align: right !important;
+    margin-bottom: 15px !important;
+    font-size: 11pt !important;
+  }
+
+  .print-receipt .receipt-totals div {
+    margin: 3px 0 !important;
+  }
+
+  .print-receipt .receipt-totals .total {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+    border-top: 2px solid #000 !important;
+    padding-top: 5px !important;
+    margin-top: 5px !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+  }
+
+  .print-receipt .receipt-footer {
+    text-align: center !important;
+    margin-top: 30px !important;
+    padding-top: 15px !important;
+    border-top: 1px solid #000 !important;
+    font-size: 10pt !important;
+    color: #555 !important;
+  }
+
+  .print-receipt .receipt-status-badge {
+    display: inline-block !important;
+    padding: 3px 10px !important;
+    border: 1px solid #000 !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    font-size: 10pt !important;
+    font-family: Georgia, "Times New Roman", serif !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  .print-receipt .receipt-customer-info {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+    font-size: 10pt !important;
+    line-height: 1.6 !important;
+    margin-bottom: 15px !important;
+  }
+
+  .print-receipt .receipt-customer-info span {
+    flex: 1 !important;
+    min-width: 150px !important;
+  }
+
+  .print-receipt .receipt-payment-info {
+    background: #f9f9f9 !important;
+    border: 1px solid #000 !important;
+    padding: 10px !important;
+    margin-bottom: 15px !important;
+    font-size: 10pt !important;
+  }
+
+  .print-receipt .receipt-page-info {
+    text-align: center !important;
+    font-size: 9pt !important;
+    color: #888 !important;
+    margin-top: 20px !important;
+    border-top: 1px solid #ccc !important;
+    padding-top: 10px !important;
+  }
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
 }

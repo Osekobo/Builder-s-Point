@@ -85,7 +85,6 @@ const EditProduct = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       const validTypes = [
         "image/jpeg",
         "image/jpg",
@@ -98,7 +97,6 @@ const EditProduct = () => {
         return;
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error("Image size must be less than 5MB");
         return;
@@ -164,7 +162,6 @@ const EditProduct = () => {
     setIsSaving(true);
 
     try {
-      // Step 1: Upload new image if selected (using the dedicated endpoint)
       let imageUploaded = false;
       if (selectedFile) {
         const uploadedUrl = await uploadImage();
@@ -175,8 +172,6 @@ const EditProduct = () => {
         imageUploaded = true;
       }
 
-      // Step 2: Update product details (without file_image field)
-      // The backend PUT endpoint expects only text fields, NOT file_image
       const updateData = {
         name: formData.name,
         description: formData.description,

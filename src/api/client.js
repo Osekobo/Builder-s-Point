@@ -3,8 +3,6 @@ import { API_BASE_URL } from "../config";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  // The access token lives in a httpOnly cookie, so it is sent automatically
-  // on every request. With cookies on a cross-origin API we must opt in.
   withCredentials: true,
 });
 

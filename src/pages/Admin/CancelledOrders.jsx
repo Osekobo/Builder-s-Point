@@ -33,7 +33,10 @@ const CancelledOrders = () => {
     order.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const formatMoney = (amount) => `KSh ${amount?.toLocaleString() || 0}`;
+  const formatMoney = (amount) => {
+    const numAmount = typeof amount === "string" ? parseFloat(amount.replace(/[^0-9.]/g, "")) : amount;
+    return `KSh ${numAmount?.toLocaleString() || 0}`;
+  };
 
   if (isLoading) {
     return (
@@ -46,7 +49,6 @@ const CancelledOrders = () => {
   return (
     <div className="min-h-screen bg-warm py-8 px-4">
       <div className="container mx-auto max-w-7xl">
-        {/* Header */}
         <div className="mb-8">
           <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-4">
             <FaArrowLeft className="w-4 h-4" />
@@ -78,7 +80,6 @@ const CancelledOrders = () => {
           </div>
         </div>
 
-        {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div className="bg-white border-4 border-black shadow-hard-sm p-12 text-center">
             <FaCircleXmark className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -92,7 +93,7 @@ const CancelledOrders = () => {
                 <div className="flex flex-wrap justify-between items-start gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <h3 className="font-h text-xl font-bold text-black">Order #{order.id}</h3>
+                      <h3 className="font-h text-xl font-bold text-black">Order {String(order.id).replace(/^#/, "")}</h3>
                       <span className="bg-red-100 text-red-800 border border-red-500 text-xs px-2 py-0.5 font-bold uppercase">
                         Cancelled
                       </span>
@@ -127,12 +128,9 @@ const CancelledOrders = () => {
         )}
       </div>
 
-      {/* Order Details Modal (same as above) */}
       {selectedOrder && (
-        // Modal content here (same as in AdminDashboard)
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedOrder(null)}>
           <div className="bg-white border-4 border-black shadow-hard-sm max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            {/* Modal content */}
           </div>
         </div>
       )}

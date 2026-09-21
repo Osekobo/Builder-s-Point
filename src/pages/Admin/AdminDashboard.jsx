@@ -83,7 +83,8 @@ const AdminDashboard = () => {
   }, [fetchDashboardData]);
 
   const formatMoney = (amount) => {
-    return `KSh ${amount?.toLocaleString() || 0}`;
+    const numAmount = typeof amount === "string" ? parseFloat(amount.replace(/[^0-9.]/g, "")) : amount;
+    return `KSh ${numAmount?.toLocaleString() || 0}`;
   };
 
   const getOrderStatusBadge = (status) => {
@@ -222,7 +223,7 @@ const AdminDashboard = () => {
                     <div className="flex flex-wrap justify-between items-start gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <p className="font-bold text-black text-lg">Order #{order.id}</p>
+                          <p className="font-bold text-black text-lg">Order {String(order.id).replace(/^#/, "")}</p>
                           <span className={`text-xs px-2 py-0.5 border font-bold ${getOrderStatusBadge(order.status)}`}>
                             {order.status?.toUpperCase() || 'CANCELLED'}
                           </span>
@@ -371,7 +372,7 @@ const AdminDashboard = () => {
                 {stats.recentOrders.map((order) => (
                   <div key={order.id} className="flex justify-between items-center p-3 bg-terra/5 border-2 border-terra">
                     <div>
-                      <p className="font-bold text-black">Order #{order.id}</p>
+                      <p className="font-bold text-black">Order {String(order.id).replace(/^#/, "")}</p>
                       <div className="flex items-center gap-2 text-xs text-ash mt-1">
                         <FaUser className="w-3 h-3" />
                         <span>{order.customer_name || 'Guest'}</span>
@@ -450,7 +451,7 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-2 gap-4 pb-4 border-b">
                   <div>
                     <p className="text-sm text-ash">Order ID</p>
-                    <p className="font-bold text-black text-lg">#{selectedCancelledOrder.id}</p>
+                    <p className="font-bold text-black text-lg">Order {String(selectedCancelledOrder.id).replace(/^#/, "")}</p>
                   </div>
                   <div>
                     <p className="text-sm text-ash">Status</p>

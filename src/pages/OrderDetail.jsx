@@ -1,4 +1,3 @@
-// pages/OrderDetail.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -11,13 +10,17 @@ import {
   FaPhone,
   FaEnvelope,
   FaUser,
-  FaDollarSign,
   FaCalendarDays,
   FaPrint,
 } from "react-icons/fa6";
 import useAuthStore from "../store/authStore";
+import useProductStore from "../store/productStore";
 import { getOrderDetails } from "../api/orders";
 import { logError } from "../utils/logger";
+
+const BUSINESS_NAME = "Kione Hardware";
+const BUSINESS_TAGLINE = "Your Trusted Hardware Store";
+const BUSINESS_ADDRESS = "Nairobi, Kenya";
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -26,6 +29,12 @@ const OrderDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const { user } = useAuthStore();
+  const { products } = useProductStore();
+
+  const getProductName = (productId) => {
+    const product = products.find((p) => p.id === productId);
+    return product?.name || null;
+  };
 
   const fetchOrder = useCallback(async () => {
     setIsLoading(true);
@@ -76,7 +85,31 @@ const OrderDetail = () => {
   };
 
   const formatMoney = (amount) => {
-    return `KSh ${amount?.toLocaleString() || 0}`;
+    const numAmount =
+      typeof amount === "string"
+        ? parseFloat(amount.replace(/[^0-9.]/g, ""))
+        : amount;
+    return `KSh ${numAmount?.toLocaleString() || 0}`;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleDateString("en-KG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleString("en-KG", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   if (isLoading) {
@@ -121,43 +154,40 @@ const OrderDetail = () => {
     );
   }
 
+  const statusLabel = order.status?.toUpperCase() || "PENDING";
+
   return (
     <div className="min-h-screen bg-warm py-8 px-4">
       <div className="container mx-auto max-w-4xl">
-        {/* Back Button */}
-        <Link
-          to="/orders"
-          className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-6 group"
-        >
-          <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Orders</span>
-        </Link>
-
-        {/* Print Button */}
-        <div className="flex justify-end mb-4">
+        {/* Screen-only controls */}
+        <div className="no-print flex justify-between items-start mb-6">
+          <Link
+            to="/orders"
+            className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-6 group"
+          >
+            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+            <span>Back to Orders</span>
+          </Link>
           <button
             onClick={() => window.print()}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 border-2 border-black hover:bg-gray-300 transition-colors"
           >
             <FaPrint className="w-4 h-4" />
-            <span className="text-sm font-bold uppercase">Print</span>
+            <span className="text-sm font-bold uppercase">Print Receipt</span>
           </button>
         </div>
 
-        {/* Order Header */}
-        <div className="bg-white border-4 border-black shadow-hard-lg overflow-hidden mb-6">
+        {/* Screen Layout */}
+        <div className="screen-only bg-white border-4 border-black shadow-hard-lg overflow-hidden mb-6">
           <div className="bg-terra/10 p-6 border-b-4 border-black">
             <div className="flex flex-wrap justify-between items-center gap-4">
               <div>
                 <h1 className="font-h text-3xl font-bold text-black uppercase">
-                  Order #{order.id}
+                  Order {String(order.id).replace(/^#/, "")}
                 </h1>
                 <p className="text-ash mt-1 flex items-center gap-2">
                   <FaCalendarDays className="w-4 h-4" />
-                  Placed on {new Date(
-                    order.created_at,
-                  ).toLocaleDateString()} at{" "}
-                  {new Date(order.created_at).toLocaleTimeString()}
+                  Placed on {formatDateTime(order.created_at)}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -165,13 +195,12 @@ const OrderDetail = () => {
                 <span
                   className={`px-4 py-2 text-sm font-bold uppercase border ${getStatusColor(order.status)}`}
                 >
-                  {order.status?.toUpperCase() || "PENDING"}
+                  {statusLabel}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Order Status Timeline */}
           <div className="p-6 border-b-4 border-black">
             <h2 className="font-h text-xl font-bold text-black uppercase mb-4">
               Order Status
@@ -186,7 +215,7 @@ const OrderDetail = () => {
                 <p className="text-xs font-bold">Order Placed</p>
                 {order.created_at && (
                   <p className="text-xs text-ash mt-1">
-                    {new Date(order.created_at).toLocaleDateString()}
+                    {formatDate(order.created_at)}
                   </p>
                 )}
               </div>
@@ -200,7 +229,7 @@ const OrderDetail = () => {
                 <p className="text-xs font-bold">Payment</p>
                 {order.paid_at && (
                   <p className="text-xs text-ash mt-1">
-                    {new Date(order.paid_at).toLocaleDateString()}
+                    {formatDate(order.paid_at)}
                   </p>
                 )}
               </div>
@@ -225,7 +254,6 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Order Items */}
           <div className="p-6 border-b-4 border-black">
             <h2 className="font-h text-xl font-bold text-black uppercase mb-4">
               Order Items
@@ -238,7 +266,9 @@ const OrderDetail = () => {
                 >
                   <div className="flex-1">
                     <p className="font-h font-bold text-black">
-                      {item.product_name || `Product #${item.product_id}`}
+                      {item.product_name ||
+                        getProductName(item.product_id) ||
+                        `Product ${item.product_id}`}
                     </p>
                     <p className="text-sm text-ash">
                       Quantity: {item.quantity}
@@ -261,7 +291,6 @@ const OrderDetail = () => {
             </div>
           </div>
 
-          {/* Payment Information */}
           <div className="p-6 border-b-4 border-black">
             <h2 className="font-h text-xl font-bold text-black uppercase mb-4">
               Payment Information
@@ -269,13 +298,7 @@ const OrderDetail = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="p-3 bg-gray-50 border-2 border-black">
                 <p className="text-sm text-ash">Subtotal</p>
-                <p className="font-bold text-black">
-                  {formatMoney(order.total)}
-                </p>
-              </div>
-              <div className="p-3 bg-gray-50 border-2 border-black">
-                <p className="text-sm text-ash">Shipping Fee</p>
-                <p className="font-bold text-black">Free</p>
+                <p className="font-bold text-black">{formatMoney(order.total)}</p>
               </div>
               <div className="p-3 bg-terra/10 border-2 border-terra md:col-span-2">
                 <p className="text-sm text-ash">Total Paid</p>
@@ -297,14 +320,13 @@ const OrderDetail = () => {
                 <div className="md:col-span-2 p-3 bg-gray-50 border-2 border-black">
                   <p className="text-sm text-ash">Payment Date</p>
                   <p className="font-bold text-black">
-                    {new Date(order.paid_at).toLocaleString()}
+                    {formatDateTime(order.paid_at)}
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Customer Information */}
           <div className="p-6">
             <h2 className="font-h text-xl font-bold text-black uppercase mb-4">
               Customer Information
@@ -342,8 +364,7 @@ const OrderDetail = () => {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 justify-between">
+        <div className="screen-only flex flex-wrap gap-4 justify-between">
           <Link
             to="/products"
             className="px-6 py-3 bg-gray-300 text-black font-bold uppercase border-4 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
@@ -358,6 +379,135 @@ const OrderDetail = () => {
               Complete Payment
             </Link>
           )}
+        </div>
+
+        {/* ============================================
+             PRINT-ONLY RECEIPT
+             ============================================ */}
+        <div className="print-only print-receipt">
+          <div className="receipt-container">
+            {/* Business Header */}
+            <div className="receipt-header">
+              <div className="receipt-logo">{BUSINESS_NAME}</div>
+              <div className="receipt-tagline">{BUSINESS_TAGLINE}</div>
+              <div className="receipt-tagline">{BUSINESS_ADDRESS}</div>
+            </div>
+
+            {/* Receipt Title */}
+            <h1 className="receipt-title">Order Receipt</h1>
+
+            {/* Order Info */}
+            <div className="receipt-order-info">
+              <div>
+                <p>
+                  <strong>Order ID:</strong> #{String(order.id).replace(/^#/, "")}
+                </p>
+                <p>
+                  <strong>Date:</strong> {formatDate(order.created_at)}
+                </p>
+              </div>
+              <div>
+                <p>
+                  <strong>Status:</strong>{" "}
+                  <span className="receipt-status-badge">{statusLabel}</span>
+                </p>
+                <p>
+                  <strong>Payment:</strong>{" "}
+                  {order.status === "paid"
+                    ? "Paid"
+                    : order.status === "pending"
+                      ? "Pending"
+                      : "Other"}
+                </p>
+              </div>
+            </div>
+
+            {/* Customer Info */}
+            <div className="receipt-customer-info">
+              <span>
+                <strong>Customer:</strong> {user?.name || "N/A"}
+              </span>
+              <span>
+                <strong>Email:</strong> {user?.email || "N/A"}
+              </span>
+              <span>
+                <strong>Phone:</strong> {user?.phone || "N/A"}
+              </span>
+            </div>
+
+            {/* Order Items Table */}
+            <h2 className="receipt-section-title">Items</h2>
+            <table className="receipt-items-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qty</th>
+                  <th style={{ textAlign: "right" }}>Unit Price</th>
+                  <th style={{ textAlign: "right" }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {order.items?.map((item, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      {item.product_name ||
+                        getProductName(item.product_id) ||
+                        `Product ${item.product_id}`}
+                    </td>
+                    <td>{item.quantity}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {formatMoney(item.price)}
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      {formatMoney(item.price * item.quantity)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Totals */}
+            <div className="receipt-totals">
+              <div>
+                <strong>Subtotal:</strong> {formatMoney(order.total)}
+              </div>
+              <div className="total">
+                <strong>Total Paid:</strong> {formatMoney(order.total)}
+              </div>
+            </div>
+
+            {/* Payment Info */}
+            {order.mpesa_receipt && (
+              <div className="receipt-payment-info">
+                <p>
+                  <strong>M-Pesa Receipt Number:</strong> {order.mpesa_receipt}
+                </p>
+                {order.paid_at && (
+                  <p>
+                    <strong>Payment Date:</strong> {formatDateTime(order.paid_at)}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="receipt-footer">
+              <p>
+                Thank you for shopping at {BUSINESS_NAME}!
+              </p>
+              <p style={{ marginTop: "5px" }}>
+                For any inquiries, please contact us at{" "}
+                {user?.email || "support@kionehardware.com"}
+              </p>
+              <p style={{ marginTop: "10px", fontSize: "9pt" }}>
+                This is a computer-generated receipt. No signature required.
+              </p>
+            </div>
+
+            <div className="receipt-page-info">
+              Order #{String(order.id).replace(/^#/, "")} - Page 1 of 1
+            </div>
+          </div>
         </div>
       </div>
     </div>

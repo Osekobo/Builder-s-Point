@@ -1,4 +1,3 @@
-// Register.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
@@ -16,18 +15,15 @@ const Register = () => {
   const { register, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
-  // Clear any stale errors when register page loads
   useEffect(() => {
     clearError();
   }, [clearError]);
 
-  // Validate phone number (Kenyan format)
   const validatePhone = (phoneNum) => {
     if (!phoneNum) {
       setPhoneError('');
-      return true; // Phone is optional
+      return true;
     }
-    // Kenyan phone number regex: starts with 0 or 254, followed by 9 digits
     const kenyanPhoneRegex = /^(254|0)[17]\d{8}$/;
     if (!kenyanPhoneRegex.test(phoneNum)) {
       setPhoneError('Enter a valid Kenyan phone number (e.g., 0712345678 or 254712345678)');
@@ -37,7 +33,6 @@ const Register = () => {
     return true;
   };
 
-  // Validate password strength
   const validatePassword = (pass) => {
     if (pass.length < 6) {
       setPasswordError('Password must be at least 6 characters');
@@ -50,30 +45,25 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if passwords match
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
     
-    // Validate password strength
     if (!validatePassword(password)) {
       return;
     }
     
-    // Validate phone (optional but format check)
     if (!validatePhone(phone)) {
       return;
     }
 
     const result = await register({ name, email, phone, password });
     if (result.success) {
-      // Auto-login successful, redirect to home
       navigate('/');
     }
   };
 
-  // Helper function to format error messages
   const formatErrorMessage = (error) => {
     if (!error) return null;
     
@@ -97,9 +87,8 @@ const Register = () => {
 
   const errorMessage = formatErrorMessage(error);
 
-  // Format phone number as user types
   const handlePhoneChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    let value = e.target.value.replace(/\D/g, '');
     if (value.length > 12) value = value.slice(0, 12);
     setPhone(value);
     validatePhone(value);

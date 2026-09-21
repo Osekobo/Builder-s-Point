@@ -77,7 +77,6 @@ const AddProduct = () => {
     if (!selectedFile) {
       newErrors.file = "Product image is required";
     } else {
-      // Validate file type and size
       const validTypes = [
         "image/jpeg",
         "image/jpg",
@@ -103,7 +102,6 @@ const AddProduct = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -114,14 +112,12 @@ const AddProduct = () => {
     if (file) {
       setSelectedFile(file);
 
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result);
       };
       reader.readAsDataURL(file);
 
-      // Clear file error
       if (errors.file) {
         setErrors((prev) => ({ ...prev, file: "" }));
       }
@@ -132,7 +128,6 @@ const AddProduct = () => {
     e.preventDefault();
 
     if (!validateForm()) {
-      // Scroll to first error
       const firstError = Object.keys(errors)[0];
       const errorElement = document.querySelector(`[name="${firstError}"]`);
       if (errorElement) {
@@ -180,16 +175,13 @@ const AddProduct = () => {
       );
 
       if (response.status === 200 || response.status === 201) {
-        // Show success message
         toast.success("Product created successfully!");
-        // Navigate to products list or product detail page
         navigate("/products");
       }
     } catch (error) {
       logError("Error creating product:", error);
 
       if (error.response) {
-        // Server responded with error
         const errorMessage =
           error.response.data.detail || "Failed to create product";
 
@@ -204,13 +196,11 @@ const AddProduct = () => {
           setErrors({ submit: errorMessage });
         }
       } else if (error.request) {
-        // Request was made but no response
         setErrors({
           submit:
             "Network error. Please check if the backend server is running on http://localhost:8000",
         });
       } else {
-        // Something else happened
         setErrors({ submit: "An unexpected error occurred." });
       }
     } finally {

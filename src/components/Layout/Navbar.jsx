@@ -15,6 +15,7 @@ import {
   FaCube,
   FaBars,
   FaXmark,
+  FaMagnifyingGlass,
 } from "react-icons/fa6";
 import { useState, useEffect, useRef } from "react";
 
@@ -25,9 +26,9 @@ const Navbar = () => {
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
   const mobileMenuRef = useRef(null);
 
-  // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -43,7 +44,6 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isMobileMenuOpen]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -54,6 +54,18 @@ const Navbar = () => {
       document.body.style.overflow = "unset";
     };
   }, [isMobileMenuOpen]);
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    const term = searchInput.trim();
+    setSearchInput("");
+    setIsMobileMenuOpen(false);
+    if (term) {
+      navigate(`/products?search=${encodeURIComponent(term)}`);
+    } else {
+      navigate("/products");
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -75,6 +87,22 @@ const Navbar = () => {
               <span className="hidden sm:inline">Kione Hardware</span>
               <span className="sm:hidden">KH</span>
             </Link>
+
+            <form
+              onSubmit={handleSearchSubmit}
+              className="hidden md:flex flex-1 max-w-xl mx-6"
+            >
+              <div className="relative w-full">
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ash w-5 h-5" />
+                <input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full pl-10 pr-4 py-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-terra text-sm"
+                />
+              </div>
+            </form>
 
             
             <div className="hidden md:flex items-center space-x-6">
@@ -277,6 +305,22 @@ const Navbar = () => {
               </button>
             </div>
           </div>
+
+          <form
+            onSubmit={handleSearchSubmit}
+            className="md:hidden pb-3"
+          >
+            <div className="relative">
+              <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ash w-5 h-5" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 border-2 border-black focus:outline-none focus:ring-2 focus:ring-terra text-sm"
+              />
+            </div>
+          </form>
         </div>
       </nav>
 
@@ -309,11 +353,10 @@ const Navbar = () => {
               className="p-2 border-2 border-black hover:bg-terra/10 transition-colors"
               aria-label="Close menu"
             >
-              <FaXmark className="w-6 h-6" />
+<FaXmark className="w-6 h-6" />
             </button>
           </div>
 
-          
           <div className="p-4 space-y-1 overflow-y-auto h-[calc(100%-65px)]">
             
             <Link

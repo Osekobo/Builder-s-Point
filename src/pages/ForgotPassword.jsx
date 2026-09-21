@@ -1,4 +1,3 @@
-// src/pages/ForgotPassword.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { FaEnvelope, FaArrowLeft, FaShieldHalved, FaCircleCheck, FaCircleExclamation } from 'react-icons/fa6';
@@ -20,7 +19,6 @@ const ForgotPassword = () => {
       const response = await api.post('/auth/forgot-password', { email });
       if (response.data.success) {
         setIsEmailSent(true);
-        // Store email in sessionStorage for OTP verification
         sessionStorage.setItem('reset_email', email);
       }
     } catch (err) {
