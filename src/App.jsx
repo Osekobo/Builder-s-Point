@@ -1,38 +1,72 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
-import Layout from './components/Layout/Layout';
-import ProtectedRoute from './components/Common/ProtectedRoute';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Products from './pages/Products';
-import ProductDetail from './pages/ProductDetail';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Account from './pages/Account';
-import AddProduct from './pages/Admin/AddProduct';
-import EditProduct from './pages/Admin/EditProduct';
-import ManageProducts from './pages/Admin/ManageProducts';
-import AdminDashboard from './pages/Admin/AdminDashboard';
-import NewsletterSubscribers from './pages/Admin/NewsletterSubscribers';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import OrderDetail from './pages/OrderDetail';
-import CancelledOrders from './pages/Admin/CancelledOrders';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import Layout from "./components/Layout/Layout";
+import ProtectedRoute from "./components/Common/ProtectedRoute";
+import Loading from "./components/Common/Loading";
+import useAuthStore from "./store/authStore";
 
-// ScrollToTop component - resets scroll on every route change
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Orders = lazy(() => import("./pages/Orders"));
+const OrderDetail = lazy(() => import("./pages/OrderDetail"));
+const Account = lazy(() => import("./pages/Account"));
+const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
+const EditProduct = lazy(() => import("./pages/Admin/EditProduct"));
+const ManageProducts = lazy(() => import("./pages/Admin/ManageProducts"));
+const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const CancelledOrders = lazy(() => import("./pages/Admin/CancelledOrders"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const InfoPage = lazy(() => import("./pages/InfoPage"));
+const Forbidden = lazy(() => import("./pages/Forbidden"));
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    // Reset scroll position to top on route change
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'instant' // Use 'instant' to prevent smooth scrolling interference
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
+
+  return null;
+};
+
+const AuthRedirect = () => {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const handleExpiredSession = () => {
+      if (pathname !== "/login") {
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/login", { replace: true });
+      }
+    };
+    window.addEventListener("auth:unauthorized", handleExpiredSession);
+    return () =>
+      window.removeEventListener("auth:unauthorized", handleExpiredSession);
+  }, [navigate, pathname]);
+
+  return null;
+};
+
+const SessionProvider = () => {
+  const checkSession = useAuthStore((state) => state.checkSession);
+
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
   return null;
 };
@@ -41,86 +75,125 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
+      <SessionProvider />
+      <AuthRedirect />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#363636",
+            color: "#fff",
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: "#E04E00",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: "#EF4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
       <Layout>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/order/:id" element={<OrderDetail />} />
-          <Route path="/admin/cancelled-orders" element={<CancelledOrders />} />
-
-          {/* Protected User Routes */}
-          <Route
-            path="/account"
-            element={
-              <ProtectedRoute>
-                <Account />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/add-product"
-            element={
-              <ProtectedRoute>
-                <AddProduct />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/products"
-            element={
-              <ProtectedRoute>
-                <ManageProducts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/edit-product/:id"
-            element={
-              <ProtectedRoute>
-                <EditProduct />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/newsletter"
-            element={
-              <ProtectedRoute>
-                <NewsletterSubscribers />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/403" element={<Forbidden />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route
+              path="/order/:id"
+              element={
+                <ProtectedRoute>
+                  <OrderDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/about" element={<InfoPage />} />
+            <Route path="/contact" element={<InfoPage />} />
+            <Route path="/faq" element={<InfoPage />} />
+            <Route path="/privacy-policy" element={<InfoPage />} />
+            <Route path="/terms" element={<InfoPage />} />
+            <Route path="/returns" element={<InfoPage />} />
+            <Route path="/payment" element={<InfoPage />} />
+            <Route
+              path="/account"
+              element={
+                <ProtectedRoute>
+                  <Account />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/add-product"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AddProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <ProtectedRoute adminOnly>
+                  <ManageProducts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/edit-product/:id"
+              element={
+                <ProtectedRoute adminOnly>
+                  <EditProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cancelled-orders"
+              element={
+                <ProtectedRoute adminOnly>
+                  <CancelledOrders />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
       </Layout>
     </Router>
   );

@@ -1,134 +1,138 @@
 // src/store/authStore.js
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { jwtDecode } from 'jwt-decode';
-import { login as loginApi, register as registerApi } from '../api/auth';
+import { create } from "zustand";
+import {
+  login as loginApi,
+  register as registerApi,
+  logout as logoutApi,
+  getMe,
+} from "../api/auth";
+import useCartStore from "./cartStore";
+import { log, logError } from "../utils/logger";
 
-const useAuthStore = create(
-  persist(
-    (set, get) => ({  // Added 'get' for accessing current state
-      user: null,
-      token: null,
-      isLoading: false,
-      error: null,
+// Old persisted token-based session is no longer used (token now lives in a
+// httpOnly cookie). Clear any stale data left in localStorage.
+try {
+  localStorage.removeItem("auth-storage");
+} catch {
+  // ignore storage access errors (e.g. private mode)
+}
 
-      login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        try {
-          const response = await loginApi({ email, password });
-          const { access_token } = response.data;
-          const user = jwtDecode(access_token);
-          
-          // Store both in Zustand and localStorage
-          set({ token: access_token, user, isLoading: false, error: null });
-          localStorage.setItem('access_token', access_token);
-          
-          return { success: true, user };
-        } catch (error) {
-          console.error('Login error details:', error);
-          
-          let errorMessage = 'Login failed';
-          if (error.response?.data?.detail) {
-            errorMessage = error.response.data.detail;
-          } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          
-          set({ error: errorMessage, isLoading: false });
-          return { success: false, error: errorMessage };
-        }
-      },
+const getErrorMessage = (error, fallback) => {
+  if (error.response?.data?.detail) return error.response.data.detail;
+  if (error.response?.data?.message) return error.response.data.message;
+  if (error.message) return error.message;
+  return fallback;
+};
 
-      register: async (userData) => {
-        set({ isLoading: true, error: null });
-        try {
-          console.log('📝 Registering user:', { ...userData, password: '***' });
-          
-          // Register the user
-          const registerResponse = await registerApi(userData);
-          console.log('✅ Registration successful');
-          
-          // Auto-login after registration
-          const loginResponse = await loginApi({ 
-            email: userData.email, 
-            password: userData.password 
-          });
-          
-          const { access_token } = loginResponse.data;
-          const user = jwtDecode(access_token);
-          
-          set({ 
-            token: access_token, 
-            user, 
-            isLoading: false,
-            error: null
-          });
-          localStorage.setItem('access_token', access_token);
-          
-          return { success: true, user };
-          
-        } catch (error) {
-          console.error('❌ Registration error:', error);
-          
-          let errorMessage = 'Registration failed';
-          if (error.response?.data?.detail) {
-            errorMessage = error.response.data.detail;
-          } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          
-          set({ error: errorMessage, isLoading: false });
-          return { success: false, error: errorMessage };
-        }
-      },
+const useAuthStore = create((set, get) => ({
+  user: null,
+  isLoading: false,
+  sessionLoaded: false,
+  error: null,
 
-      logout: () => {
-        localStorage.removeItem('access_token');
-        set({ user: null, token: null, error: null });
-      },
-      
-      clearError: () => set({ error: null }),
-      
-      // ✅ Helper method to check if user is logged in
-      isAuthenticated: () => {
-        const { token } = get();
-        return !!token;
-      },
-      
-      // ✅ Helper method to get user's phone number
-      getUserPhone: () => {
-        const { user } = get();
-        return user?.phone || '';
-      },
-      
-      // ✅ Helper method to check if user is admin
-      isAdmin: () => {
-        const { user } = get();
-        return user?.is_admin === true;
-      },
-      
-      // ✅ Update user info (useful after profile updates)
-      updateUser: (updates) => {
-        set((state) => ({
-          user: { ...state.user, ...updates }
-        }));
+  // Hydrate the current session from the server (cookie backed). Called once
+  // on app start so ProtectedRoute knows whether the user is authenticated.
+  checkSession: async () => {
+    if (get().sessionLoaded) return;
+    try {
+      const { data: user } = await getMe();
+      set({ user, sessionLoaded: true });
+    } catch (error) {
+      // 401 just means "no valid session cookie" (anonymous visitor or an
+      // expired token) — expected, so keep the console quiet.
+      if (error.response?.status === 401) {
+        set({ user: null, sessionLoaded: true });
+        return;
       }
-    }),
-    {
-      name: 'auth-storage',
-      getStorage: () => localStorage,
-      partialize: (state) => ({ 
-        user: state.user, 
-        token: state.token 
-      }),
-      // ✅ Optional: versioning to handle schema changes
-      version: 1,
+      logError("Session check failed:", error);
+      set({ user: null, sessionLoaded: true });
     }
-  )
-);
+  },
+
+  login: async (email, password) => {
+    set({ isLoading: true, error: null });
+    try {
+      await loginApi({ email, password });
+      const { data: user } = await getMe();
+
+      set({ user, isLoading: false, error: null, sessionLoaded: true });
+      await useCartStore.getState().mergeGuestCartToServer();
+
+      return { success: true, user };
+    } catch (error) {
+      logError("Login error details:", error);
+
+      const errorMessage = getErrorMessage(error, "Login failed");
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  register: async (userData) => {
+    set({ isLoading: true, error: null });
+    try {
+      log("📝 Registering user:", { ...userData, password: "***" });
+
+      await registerApi(userData);
+      log("✅ Registration successful");
+
+      // Auto-login after registration
+      await loginApi({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      const { data: user } = await getMe();
+
+      set({
+        user,
+        isLoading: false,
+        error: null,
+        sessionLoaded: true,
+      });
+      await useCartStore.getState().mergeGuestCartToServer();
+
+      return { success: true, user };
+    } catch (error) {
+      logError("❌ Registration error:", error);
+
+      const errorMessage = getErrorMessage(error, "Registration failed");
+      set({ error: errorMessage, isLoading: false });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  logout: async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      logError("Logout error:", error);
+    }
+    useCartStore.getState().resetCart();
+    set({ user: null, isLoading: false, error: null });
+  },
+
+  clearError: () => set({ error: null }),
+
+  isAuthenticated: () => {
+    return !!get().user;
+  },
+
+  getUserPhone: () => {
+    const { user } = get();
+    return user?.phone || "";
+  },
+
+  isAdmin: () => {
+    const { user } = get();
+    return user?.is_admin === true;
+  },
+
+  updateUser: (updates) => {
+    set((state) => ({
+      user: { ...state.user, ...updates },
+    }));
+  },
+}));
 
 export default useAuthStore;

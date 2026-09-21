@@ -1,5 +1,9 @@
-import api from './client';
+import api from "./client";
 
-export const checkout = () => api.post('/orders/checkout');
-export const getOrders = () => api.get('/orders');
+export const createOrder = (payload) => api.post("/orders/create", payload);
+export const getOrders = () => api.get("/orders");
 export const getOrderDetails = (orderId) => api.get(`/orders/${orderId}`);
+export const cancelOrder = (orderId) =>
+  api.post(`/orders/${orderId}/cancel`);
+export const retryPayment = (orderId) =>
+  api.post(`/orders/${orderId}/retry-payment`);

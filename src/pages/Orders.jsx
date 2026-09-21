@@ -1,69 +1,57 @@
 // pages/Orders.jsx
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { getOrders } from "../api/orders";
-import useAuthStore from "../store/authStore";
+import { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { getOrders, cancelOrder as cancelOrderApi, retryPayment as retryPaymentApi } from "../api/orders";
+import toast from "react-hot-toast";
+import { logError } from "../utils/logger";
 import {
-  FiPackage,
-  FiCheckCircle,
-  FiTruck,
-  FiClock,
-  FiShoppingBag,
-  FiCalendar,
-  FiAlertCircle,
-  FiXCircle,
-  FiDollarSign,
-  FiRefreshCw,
-} from "react-icons/fi";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  FaCube,
+  FaCircleCheck,
+  FaTruck,
+  FaClock,
+  FaBagShopping,
+  FaCalendarDays,
+  FaCircleExclamation,
+  FaCircleXmark,
+  FaDollarSign,
+  FaRotate,
+} from "react-icons/fa6";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [processingOrderId, setProcessingOrderId] = useState(null);
-  const { user } = useAuthStore();
+  const [orderToCancel, setOrderToCancel] = useState(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
       const response = await getOrders();
       setOrders(response.data);
     } catch (error) {
-      console.error("Failed to fetch orders:", error);
+      logError("Failed to fetch orders:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const cancelOrder = async (orderId) => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) {
-      return;
-    }
-
     setProcessingOrderId(orderId);
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(`${API_URL}/orders/${orderId}/cancel`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        alert("Order cancelled successfully");
-        fetchOrders(); // Refresh orders
-      } else {
-        const error = await response.json();
-        alert(error.detail || "Failed to cancel order");
-      }
+      await cancelOrderApi(orderId);
+      toast.success("Order cancelled successfully");
+      fetchOrders();
     } catch (error) {
-      console.error("Error cancelling order:", error);
-      alert("Failed to cancel order");
+      logError("Error cancelling order:", error);
+      toast.error(error.response?.data?.detail || "Failed to cancel order");
     } finally {
       setProcessingOrderId(null);
     }
@@ -72,30 +60,12 @@ const Orders = () => {
   const retryPayment = async (orderId) => {
     setProcessingOrderId(orderId);
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(
-        `${API_URL}/orders/${orderId}/retry-payment`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(`New order created! Redirecting to checkout...`);
-        // Redirect to checkout with the new order
-        window.location.href = "/checkout";
-      } else {
-        const error = await response.json();
-        alert(error.detail || "Failed to retry payment");
-      }
+      await retryPaymentApi(orderId);
+      toast.success("New order created! Redirecting to checkout...");
+      navigate("/checkout");
     } catch (error) {
-      console.error("Error retrying payment:", error);
-      alert("Failed to retry payment");
+      logError("Error retrying payment:", error);
+      toast.error(error.response?.data?.detail || "Failed to retry payment");
     } finally {
       setProcessingOrderId(null);
     }
@@ -104,17 +74,17 @@ const Orders = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case "paid":
-        return <FiCheckCircle className="w-5 h-5 text-green-500" />;
+        return <FaCircleCheck className="w-5 h-5 text-green-500" />;
       case "shipped":
-        return <FiTruck className="w-5 h-5 text-blue-500" />;
+        return <FaTruck className="w-5 h-5 text-blue-500" />;
       case "pending":
-        return <FiClock className="w-5 h-5 text-yellow-500" />;
+        return <FaClock className="w-5 h-5 text-yellow-500" />;
       case "cancelled":
-        return <FiXCircle className="w-5 h-5 text-red-500" />;
+        return <FaCircleXmark className="w-5 h-5 text-red-500" />;
       case "payment_failed":
-        return <FiAlertCircle className="w-5 h-5 text-red-500" />;
+        return <FaCircleExclamation className="w-5 h-5 text-red-500" />;
       default:
-        return <FiPackage className="w-5 h-5 text-gray-500" />;
+        return <FaCube className="w-5 h-5 text-gray-500" />;
     }
   };
 
@@ -170,7 +140,7 @@ const Orders = () => {
         {/* Page Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiShoppingBag className="w-8 h-8 text-white" />
+            <FaBagShopping className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl md:text-4xl font-bold text-black uppercase mb-2">
             My Orders
@@ -179,9 +149,26 @@ const Orders = () => {
           <p className="text-ash mt-2">Track your order status and history</p>
         </div>
 
-        {orders.length === 0 ? (
+        {hasError ? (
+          <div className="text-center py-16 bg-white border-4 border-red-600 shadow-hard-lg">
+            <FaCircleExclamation className="w-20 h-20 text-red-500 mx-auto mb-4" />
+            <p className="font-h text-2xl font-bold text-black uppercase mb-2">
+              Could not load your orders
+            </p>
+            <p className="text-ash mb-6">
+              Check your connection and try again.
+            </p>
+            <button
+              onClick={fetchOrders}
+              className="inline-flex items-center gap-2 bg-terra text-white px-8 py-3 font-bold uppercase tracking-wider border-4 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+            >
+              <FaRotate className="w-4 h-4" />
+              Try Again
+            </button>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-16 bg-white border-4 border-black shadow-hard-lg">
-            <FiPackage className="w-20 h-20 text-ash mx-auto mb-4" />
+            <FaCube className="w-20 h-20 text-ash mx-auto mb-4" />
             <p className="font-h text-2xl font-bold text-black uppercase mb-2">
               No orders yet
             </p>
@@ -205,18 +192,18 @@ const Orders = () => {
                   <div className="flex flex-wrap justify-between items-start gap-4 border-b-4 border-black pb-4 mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <FiPackage className="w-5 h-5 text-terra" />
+                        <FaCube className="w-5 h-5 text-terra" />
                         <p className="font-h font-bold text-black text-lg">
                           Order #{order.id}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-ash">
                         <span className="flex items-center gap-1">
-                          <FiCalendar className="w-3 h-3" />
+                          <FaCalendarDays className="w-3 h-3" />
                           {new Date(order.created_at).toLocaleDateString()}
                         </span>
                         <span className="flex items-center gap-1">
-                          <FiDollarSign className="w-3 h-3" />
+                          <FaDollarSign className="w-3 h-3" />
                           {formatMoney(order.total)}
                         </span>
                       </div>
@@ -305,7 +292,7 @@ const Orders = () => {
                           disabled={processingOrderId === order.id}
                           className="px-4 py-2 bg-terra text-white text-sm font-bold uppercase border-2 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50 flex items-center gap-2"
                         >
-                          <FiRefreshCw
+                          <FaRotate
                             className={`w-4 h-4 ${processingOrderId === order.id ? "animate-spin" : ""}`}
                           />
                           {processingOrderId === order.id
@@ -317,11 +304,11 @@ const Orders = () => {
                       {/* ✅ CANCEL ORDER BUTTON - Only for pending orders */}
                       {order.status === "pending" && (
                         <button
-                          onClick={() => cancelOrder(order.id)}
+                          onClick={() => setOrderToCancel(order)}
                           disabled={processingOrderId === order.id}
                           className="px-4 py-2 bg-red-600 text-white text-sm font-bold uppercase border-2 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50 flex items-center gap-2"
                         >
-                          <FiXCircle className="w-4 h-4" />
+                          <FaCircleXmark className="w-4 h-4" />
                           {processingOrderId === order.id
                             ? "Processing..."
                             : "Cancel Order"}
@@ -333,7 +320,7 @@ const Orders = () => {
                         to={`/order/${order.id}`}
                         className="px-4 py-2 bg-gray-300 text-black text-sm font-bold uppercase border-2 border-black hover:bg-gray-400 transition-all flex items-center gap-2"
                       >
-                        <FiPackage className="w-4 h-4" />
+                        <FaCube className="w-4 h-4" />
                         View Details
                       </Link>
                     </div>
@@ -344,6 +331,47 @@ const Orders = () => {
           </div>
         )}
       </div>
+
+      {orderToCancel && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setOrderToCancel(null)}
+        >
+          <div
+            className="bg-white border-4 border-black shadow-hard-lg p-6 max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="font-h text-lg font-bold text-black uppercase mb-3">
+              Cancel Order #{orderToCancel.id}?
+            </h2>
+            <p className="text-ash mb-6">
+              Are you sure you want to cancel this order? This action cannot be
+              undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  const id = orderToCancel.id;
+                  setOrderToCancel(null);
+                  cancelOrder(id);
+                }}
+                disabled={processingOrderId === orderToCancel.id}
+                className="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-bold uppercase border-2 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all disabled:opacity-50"
+              >
+                {processingOrderId === orderToCancel.id
+                  ? "Processing..."
+                  : "Yes, Cancel"}
+              </button>
+              <button
+                onClick={() => setOrderToCancel(null)}
+                className="flex-1 px-4 py-2 bg-gray-300 text-black text-sm font-bold uppercase border-2 border-black hover:bg-gray-400 transition-all"
+              >
+                Keep Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

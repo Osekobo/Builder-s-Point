@@ -1,68 +1,64 @@
 // pages/OrderDetail.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
-  FiArrowLeft,
-  FiPackage,
-  FiCheckCircle,
-  FiClock,
-  FiTruck,
-  FiMapPin,
-  FiPhone,
-  FiMail,
-  FiUser,
-  FiDollarSign,
-  FiCalendar,
-  FiPrinter,
-} from "react-icons/fi";
+  FaArrowLeft,
+  FaCube,
+  FaCircleCheck,
+  FaClock,
+  FaTruck,
+  FaLocationDot,
+  FaPhone,
+  FaEnvelope,
+  FaUser,
+  FaDollarSign,
+  FaCalendarDays,
+  FaPrint,
+} from "react-icons/fa6";
 import useAuthStore from "../store/authStore";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+import { getOrderDetails } from "../api/orders";
+import { logError } from "../utils/logger";
 
 const OrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const { user } = useAuthStore();
 
-  useEffect(() => {
-    fetchOrder();
-  }, [id]);
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(`${API_URL}/orders/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 404) {
+      const response = await getOrderDetails(id);
+      setOrder(response.data);
+    } catch (error) {
+      if (error.response?.status === 404) {
         navigate("/orders");
         return;
       }
-
-      const data = await response.json();
-      setOrder(data);
-    } catch (error) {
-      console.error("Error fetching order:", error);
+      logError("Error fetching order:", error);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "paid":
-        return <FiCheckCircle className="w-6 h-6 text-green-500" />;
+        return <FaCircleCheck className="w-6 h-6 text-green-500" />;
       case "shipped":
-        return <FiTruck className="w-6 h-6 text-blue-500" />;
+        return <FaTruck className="w-6 h-6 text-blue-500" />;
       case "pending":
-        return <FiClock className="w-6 h-6 text-yellow-500" />;
+        return <FaClock className="w-6 h-6 text-yellow-500" />;
       default:
-        return <FiPackage className="w-6 h-6 text-gray-500" />;
+        return <FaCube className="w-6 h-6 text-gray-500" />;
     }
   };
 
@@ -91,6 +87,27 @@ const OrderDetail = () => {
     );
   }
 
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-warm flex items-center justify-center px-4">
+        <div className="text-center bg-white border-4 border-red-600 shadow-hard-lg p-10 max-w-md">
+          <p className="font-h text-xl font-bold text-black uppercase mb-2">
+            Could not load this order
+          </p>
+          <p className="text-ash mb-6">
+            Check your connection and try again.
+          </p>
+          <button
+            onClick={fetchOrder}
+            className="inline-block bg-terra text-white px-8 py-3 font-bold uppercase tracking-wider border-4 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!order) {
     return (
       <div className="min-h-screen bg-warm flex items-center justify-center">
@@ -112,7 +129,7 @@ const OrderDetail = () => {
           to="/orders"
           className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-6 group"
         >
-          <FiArrowLeft className="group-hover:-translate-x-1 transition-transform" />
+          <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
           <span>Back to Orders</span>
         </Link>
 
@@ -122,7 +139,7 @@ const OrderDetail = () => {
             onClick={() => window.print()}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 border-2 border-black hover:bg-gray-300 transition-colors"
           >
-            <FiPrinter className="w-4 h-4" />
+            <FaPrint className="w-4 h-4" />
             <span className="text-sm font-bold uppercase">Print</span>
           </button>
         </div>
@@ -136,7 +153,7 @@ const OrderDetail = () => {
                   Order #{order.id}
                 </h1>
                 <p className="text-ash mt-1 flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4" />
+                  <FaCalendarDays className="w-4 h-4" />
                   Placed on {new Date(
                     order.created_at,
                   ).toLocaleDateString()} at{" "}
@@ -164,7 +181,7 @@ const OrderDetail = () => {
                 className={`text-center ${order.created_at ? "opacity-100" : "opacity-50"}`}
               >
                 <div className="w-10 h-10 rounded-full bg-terra/20 border-2 border-terra flex items-center justify-center mx-auto mb-2">
-                  <FiPackage className="w-5 h-5 text-terra" />
+                  <FaCube className="w-5 h-5 text-terra" />
                 </div>
                 <p className="text-xs font-bold">Order Placed</p>
                 {order.created_at && (
@@ -178,7 +195,7 @@ const OrderDetail = () => {
                 className={`text-center ${order.paid_at ? "opacity-100" : "opacity-50"}`}
               >
                 <div className="w-10 h-10 rounded-full bg-terra/20 border-2 border-terra flex items-center justify-center mx-auto mb-2">
-                  <FiCheckCircle className="w-5 h-5 text-terra" />
+                  <FaCircleCheck className="w-5 h-5 text-terra" />
                 </div>
                 <p className="text-xs font-bold">Payment</p>
                 {order.paid_at && (
@@ -192,7 +209,7 @@ const OrderDetail = () => {
                 className={`text-center ${order.status === "shipped" ? "opacity-100" : "opacity-50"}`}
               >
                 <div className="w-10 h-10 rounded-full bg-terra/20 border-2 border-terra flex items-center justify-center mx-auto mb-2">
-                  <FiTruck className="w-5 h-5 text-terra" />
+                  <FaTruck className="w-5 h-5 text-terra" />
                 </div>
                 <p className="text-xs font-bold">Shipped</p>
               </div>
@@ -201,7 +218,7 @@ const OrderDetail = () => {
                 className={`text-center ${order.status === "delivered" ? "opacity-100" : "opacity-50"}`}
               >
                 <div className="w-10 h-10 rounded-full bg-terra/20 border-2 border-terra flex items-center justify-center mx-auto mb-2">
-                  <FiCheckCircle className="w-5 h-5 text-terra" />
+                  <FaCircleCheck className="w-5 h-5 text-terra" />
                 </div>
                 <p className="text-xs font-bold">Delivered</p>
               </div>
@@ -294,28 +311,28 @@ const OrderDetail = () => {
             </h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-black">
-                <FiUser className="w-5 h-5 text-terra" />
+                <FaUser className="w-5 h-5 text-terra" />
                 <div>
                   <p className="text-xs text-ash">Customer Name</p>
                   <p className="font-bold text-black">{user?.name || "N/A"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-black">
-                <FiMail className="w-5 h-5 text-terra" />
+                <FaEnvelope className="w-5 h-5 text-terra" />
                 <div>
                   <p className="text-xs text-ash">Email Address</p>
                   <p className="font-bold text-black">{user?.email || "N/A"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-black">
-                <FiPhone className="w-5 h-5 text-terra" />
+                <FaPhone className="w-5 h-5 text-terra" />
                 <div>
                   <p className="text-xs text-ash">Phone Number</p>
                   <p className="font-bold text-black">{user?.phone || "N/A"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-black">
-                <FiMapPin className="w-5 h-5 text-terra" />
+                <FaLocationDot className="w-5 h-5 text-terra" />
                 <div>
                   <p className="text-xs text-ash">Delivery Address</p>
                   <p className="font-bold text-black">To be confirmed</p>

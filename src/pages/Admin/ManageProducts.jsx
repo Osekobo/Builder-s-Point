@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import toast from "react-hot-toast";
 import {
-  FiEdit2,
-  FiTrash2,
-  FiPlus,
-  FiPackage,
-  FiDollarSign,
-  FiShoppingBag,
-  FiSearch,
-  FiRefreshCw,
-} from "react-icons/fi";
-
-const API_BASE_URL = "http://localhost:8000";
+  FaPenToSquare,
+  FaTrash,
+  FaPlus,
+  FaCube,
+  FaDollarSign,
+  FaBagShopping,
+  FaMagnifyingGlass,
+  FaRotate,
+} from "react-icons/fa6";
+import api from "../../api/client";
+import { getImageUrl } from "../../utils/image";
+import { logError } from "../../utils/logger";
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -24,23 +25,10 @@ const ManageProducts = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
 
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    filterProducts();
-  }, [searchTerm, selectedCategory, products]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("access_token");
-      // Fetch all products (you might want to add pagination here for large inventories)
-      const response = await axios.get(`${API_BASE_URL}/products/?limit=100`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await api.get("/products/?limit=100");
 
       let productsData = [];
       let total = 0;
@@ -59,37 +47,30 @@ const ManageProducts = () => {
       setProducts(productsData);
       setTotalProducts(total);
 
-      // Calculate total inventory value
       const totalInventoryValue = productsData.reduce(
         (sum, product) => sum + (product.price || 0) * (product.stock || 0),
         0,
       );
       setTotalValue(totalInventoryValue);
     } catch (error) {
-      console.error("Error fetching products:", error);
-      if (error.response?.status === 401) {
-        alert("Please login to manage products");
-      } else {
-        alert(
-          "Failed to fetch products: " +
-            (error.response?.data?.detail || error.message),
-        );
-      }
+      logError("Error fetching products:", error);
+      toast.error(
+        error.response?.status === 401
+          ? "Please login to manage products"
+          : "Failed to fetch products: " +
+              (error.response?.data?.detail || error.message),
+      );
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await axios.get(`${API_BASE_URL}/products/categories`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await api.get("/products/categories");
       setCategories(response.data);
     } catch (error) {
-      console.error("Error fetching categories:", error);
-      // Use default categories if API fails
+      logError("Error fetching categories:", error);
       setCategories([
         "building",
         "paints",
@@ -99,12 +80,11 @@ const ManageProducts = () => {
         "general",
       ]);
     }
-  };
+  }, []);
 
-  const filterProducts = () => {
+  const filterProducts = useCallback(() => {
     let filtered = [...products];
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (product) =>
@@ -116,7 +96,6 @@ const ManageProducts = () => {
       );
     }
 
-    // Filter by category
     if (selectedCategory !== "all") {
       filtered = filtered.filter(
         (product) => product.category === selectedCategory,
@@ -124,7 +103,16 @@ const ManageProducts = () => {
     }
 
     setFilteredProducts(filtered);
-  };
+  }, [products, searchTerm, selectedCategory]);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
+
+  useEffect(() => {
+    filterProducts();
+  }, [filterProducts]);
 
   const handleDelete = async (id, name) => {
     if (
@@ -133,32 +121,21 @@ const ManageProducts = () => {
       )
     ) {
       try {
-        const token = localStorage.getItem("access_token");
-        await axios.delete(`${API_BASE_URL}/products/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        alert("Product deleted successfully!");
+        await api.delete(`/products/${id}`);
+        toast.success("Product deleted successfully!");
         // Refresh the product list
         fetchProducts();
       } catch (error) {
-        console.error("Error deleting product:", error);
+        logError("Error deleting product:", error);
         let errorMessage = "Failed to delete product";
         if (error.response?.status === 401) {
           errorMessage = "Please login to delete products";
         } else if (error.response?.data?.detail) {
           errorMessage = error.response.data.detail;
         }
-        alert(errorMessage);
+        toast.error(errorMessage);
       }
     }
-  };
-
-  // Helper function to get image URL
-  const getImageUrl = (fileImage) => {
-    if (!fileImage) return null;
-    if (fileImage.startsWith("http")) return fileImage;
-    if (fileImage.startsWith("data:")) return fileImage;
-    return `${API_BASE_URL}${fileImage}`;
   };
 
   const getCategoryName = (category) => {
@@ -225,12 +202,12 @@ const ManageProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm py-8 px-4">
-      <div className="container mx-auto max-w-7xl">
-        {/* Page Header */}
+    <div className="min-h-screen bg-warm py-3 px-3 md:py-4">
+      <div className="mx-auto w-full max-w-[1600px]">
+        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiPackage className="w-8 h-8 text-white" />
+            <FaCube className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl md:text-4xl font-bold text-black uppercase mb-2">
             Manage Products
@@ -241,29 +218,29 @@ const ManageProducts = () => {
           </p>
         </div>
 
-        {/* Actions Bar */}
+        
         <div className="bg-white border-4 border-black shadow-hard-sm p-4 mb-6">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <Link
               to="/admin/add-product"
               className="bg-terra text-white px-4 py-2 font-bold uppercase tracking-wider border-4 border-black shadow-hard-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all flex items-center space-x-2"
             >
-              <FiPlus className="w-5 h-5" />
+              <FaPlus className="w-5 h-5" />
               <span>Add New Product</span>
             </Link>
 
             <div className="flex flex-wrap gap-3">
-              {/* Refresh Button */}
+              
               <button
                 onClick={fetchProducts}
                 className="px-3 py-2 border-2 border-black hover:bg-terra/10 transition-colors flex items-center space-x-2"
                 title="Refresh products"
               >
-                <FiRefreshCw className="w-4 h-4" />
+                <FaRotate className="w-4 h-4" />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
 
-              {/* Category Filter */}
+              
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -276,9 +253,9 @@ const ManageProducts = () => {
                 ))}
               </select>
 
-              {/* Search Bar */}
+              
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ash" />
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ash" />
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -291,7 +268,7 @@ const ManageProducts = () => {
           </div>
         </div>
 
-        {/* Products Table */}
+        
         <div className="bg-white border-4 border-black shadow-hard-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y-2 divide-black">
@@ -321,7 +298,7 @@ const ManageProducts = () => {
                 {filteredProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-12 text-center text-ash">
-                      <FiPackage className="w-12 h-12 mx-auto mb-3 text-ash" />
+                      <FaCube className="w-12 h-12 mx-auto mb-3 text-ash" />
                       <p className="font-h text-lg">No products found</p>
                       <p className="text-sm mt-1">
                         Try adjusting your search or add a new product
@@ -379,7 +356,7 @@ const ManageProducts = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
-                          <FiDollarSign className="w-4 h-4 text-terra" />
+                          <FaDollarSign className="w-4 h-4 text-terra" />
                           <span className="text-sm font-bold text-terra">
                             KSh {product.price?.toLocaleString() || 0}
                           </span>
@@ -399,7 +376,7 @@ const ManageProducts = () => {
                             className="text-terra hover:text-terra-dark transition-colors"
                             title="Edit Product"
                           >
-                            <FiEdit2 className="w-5 h-5" />
+                            <FaPenToSquare className="w-5 h-5" />
                           </Link>
                           <button
                             onClick={() =>
@@ -408,7 +385,7 @@ const ManageProducts = () => {
                             className="text-red-600 hover:text-red-700 transition-colors"
                             title="Delete Product"
                           >
-                            <FiTrash2 className="w-5 h-5" />
+                            <FaTrash className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
@@ -420,10 +397,10 @@ const ManageProducts = () => {
           </div>
         </div>
 
-        {/* Summary Cards */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
           <div className="bg-white border-4 border-black shadow-hard-sm p-4 text-center">
-            <FiPackage className="w-6 h-6 text-terra mx-auto mb-2" />
+            <FaCube className="w-6 h-6 text-terra mx-auto mb-2" />
             <p className="text-ash text-xs uppercase tracking-wider">
               Total Products
             </p>
@@ -432,7 +409,7 @@ const ManageProducts = () => {
             </p>
           </div>
           <div className="bg-white border-4 border-black shadow-hard-sm p-4 text-center">
-            <FiShoppingBag className="w-6 h-6 text-terra mx-auto mb-2" />
+            <FaBagShopping className="w-6 h-6 text-terra mx-auto mb-2" />
             <p className="text-ash text-xs uppercase tracking-wider">
               Categories
             </p>
@@ -441,7 +418,7 @@ const ManageProducts = () => {
             </p>
           </div>
           <div className="bg-white border-4 border-black shadow-hard-sm p-4 text-center">
-            <FiDollarSign className="w-6 h-6 text-terra mx-auto mb-2" />
+            <FaDollarSign className="w-6 h-6 text-terra mx-auto mb-2" />
             <p className="text-ash text-xs uppercase tracking-wider">
               Inventory Value
             </p>
@@ -451,7 +428,7 @@ const ManageProducts = () => {
           </div>
         </div>
 
-        {/* Export/Additional Info */}
+        
         <div className="mt-6 text-center">
           <p className="text-xs text-ash">
             Showing {filteredProducts.length} of {totalProducts} products

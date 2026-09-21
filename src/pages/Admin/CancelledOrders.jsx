@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/client';
-import { FiXCircle, FiCalendar, FiEye, FiArrowLeft, FiSearch, FiFilter } from 'react-icons/fi';
+import { logError } from '../../utils/logger';
+import { FaCircleXmark, FaCalendarDays, FaEye, FaArrowLeft, FaMagnifyingGlass, FaFilter } from 'react-icons/fa6';
 
 const CancelledOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -9,27 +10,27 @@ const CancelledOrders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  useEffect(() => {
-    fetchCancelledOrders();
-  }, []);
-
-  const fetchCancelledOrders = async () => {
+  const fetchCancelledOrders = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await api.get('/orders/');
+      const response = await api.get('/orders/admin/all');
       const allOrders = Array.isArray(response.data) ? response.data : [];
       const cancelled = allOrders.filter(order => order.status === 'cancelled');
       setOrders(cancelled.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
     } catch (error) {
-      console.error('Error fetching cancelled orders:', error);
+      logError('Error fetching cancelled orders:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCancelledOrders();
+  }, [fetchCancelledOrders]);
 
   const filteredOrders = orders.filter(order => 
     order.id.toString().includes(searchTerm) ||
-    order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    order.user_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatMoney = (amount) => `KSh ${amount?.toLocaleString() || 0}`;
@@ -48,20 +49,20 @@ const CancelledOrders = () => {
         {/* Header */}
         <div className="mb-8">
           <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-4">
-            <FiArrowLeft className="w-4 h-4" />
+            <FaArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </Link>
           <div className="flex justify-between items-center flex-wrap gap-4">
             <div>
               <h1 className="font-h text-3xl md:text-4xl font-bold text-black uppercase flex items-center gap-3">
-                <FiXCircle className="text-red-600" />
+                <FaCircleXmark className="text-red-600" />
                 Cancelled Orders
               </h1>
               <p className="text-ash mt-2">Manage and review all cancelled customer orders</p>
             </div>
             <div className="flex gap-3">
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaMagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search by order ID or customer..."
@@ -71,7 +72,7 @@ const CancelledOrders = () => {
                 />
               </div>
               <button className="bg-white border-2 border-black p-2 hover:bg-gray-50">
-                <FiFilter className="w-5 h-5" />
+                <FaFilter className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -80,7 +81,7 @@ const CancelledOrders = () => {
         {/* Orders List */}
         {filteredOrders.length === 0 ? (
           <div className="bg-white border-4 border-black shadow-hard-sm p-12 text-center">
-            <FiXCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <FaCircleXmark className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-ash text-lg">No cancelled orders found</p>
             <p className="text-ash text-sm mt-2">When customers cancel orders, they will appear here</p>
           </div>
@@ -96,16 +97,16 @@ const CancelledOrders = () => {
                         Cancelled
                       </span>
                       <span className="flex items-center gap-1 text-sm text-ash">
-                        <FiCalendar className="w-4 h-4" />
+                        <FaCalendarDays className="w-4 h-4" />
                         {new Date(order.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     <p className="text-gray-600">
-                      Customer: <span className="font-semibold">{order.customer_name || 'N/A'}</span>
+                      Customer: <span className="font-semibold">{order.user_name || 'N/A'}</span>
                     </p>
-                    {order.cancellation_reason && (
+                    {order.payment_error && (
                       <p className="text-red-600 mt-1">
-                        <span className="font-bold">Reason:</span> {order.cancellation_reason}
+                        <span className="font-bold">Reason:</span> {order.payment_error}
                       </p>
                     )}
                   </div>
@@ -115,7 +116,7 @@ const CancelledOrders = () => {
                       onClick={() => setSelectedOrder(order)}
                       className="mt-2 inline-flex items-center gap-1 bg-terra text-white px-4 py-1 font-bold uppercase text-sm border-2 border-black hover:bg-terra-dark transition"
                     >
-                      <FiEye className="w-4 h-4" />
+                      <FaEye className="w-4 h-4" />
                       View Details
                     </button>
                   </div>

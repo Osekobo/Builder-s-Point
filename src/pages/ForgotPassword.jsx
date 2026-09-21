@@ -1,7 +1,7 @@
 // src/pages/ForgotPassword.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiMail, FiArrowLeft, FiShield, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FaEnvelope, FaArrowLeft, FaShieldHalved, FaCircleCheck, FaCircleExclamation } from 'react-icons/fa6';
 import api from '../api/client';
 
 const ForgotPassword = () => {
@@ -32,11 +32,11 @@ const ForgotPassword = () => {
 
   if (isEmailSent) {
     return (
-      <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
         <div className="max-w-md w-full">
           <div className="bg-white border-4 border-black shadow-hard-lg p-8 text-center">
             <div className="mx-auto flex items-center justify-center w-20 h-20 bg-terra/10 border-4 border-terra mb-6">
-              <FiMail className="h-10 w-10 text-terra" />
+              <FaEnvelope className="h-10 w-10 text-terra" />
             </div>
             <h2 className="font-h text-2xl font-bold text-black uppercase mb-2">Check Your Email</h2>
             <div className="brick-line mx-auto mb-4"></div>
@@ -68,22 +68,20 @@ const ForgotPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
       <div className="max-w-md w-full">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiShield className="w-8 h-8 text-white" />
+            <FaShieldHalved className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl font-bold text-black uppercase tracking-tight">Forgot Password?</h1>
           <div className="brick-line mx-auto mt-4"></div>
         </div>
 
-        {/* Forgot Password Card */}
         <div className="bg-white border-4 border-black shadow-hard-lg p-8">
           <div className="text-center mb-6">
             <Link to="/login" className="inline-flex items-center text-sm text-terra hover:text-terra-dark font-semibold transition-colors group">
-              <FiArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Login
+              <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Login
             </Link>
           </div>
 
@@ -96,7 +94,7 @@ const ForgotPassword = () => {
 
           {error && (
             <div className="bg-red-100 border-2 border-red-500 text-red-700 px-4 py-3 mb-4 flex items-start space-x-2">
-              <FiAlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <FaCircleExclamation className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold">Error</p>
                 <p className="text-sm">{error}</p>
@@ -111,7 +109,7 @@ const ForgotPassword = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-ash" />
+                  <FaEnvelope className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="email"
@@ -137,7 +135,7 @@ const ForgotPassword = () => {
                 </>
               ) : (
                 <>
-                  <FiMail className="w-5 h-5" />
+                  <FaEnvelope className="w-5 h-5" />
                   <span>Send Reset Code</span>
                 </>
               )}
@@ -160,10 +158,9 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* Security Note */}
           <div className="mt-6 pt-6 border-t-2 border-black text-center">
             <p className="text-xs text-ash flex items-center justify-center space-x-1">
-              <FiShield className="w-3 h-3 text-terra" />
+              <FaShieldHalved className="w-3 h-3 text-terra" />
               <span>Your information is secure</span>
             </p>
           </div>

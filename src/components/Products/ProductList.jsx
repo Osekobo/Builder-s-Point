@@ -8,7 +8,7 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   if (isLoading) return <LoadingSpinner />;
 

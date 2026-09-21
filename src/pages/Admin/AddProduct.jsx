@@ -1,11 +1,9 @@
-// src/components/AddProduct.jsx
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AddProduct.css";
+import toast from "react-hot-toast";
 import api from "../../api/client";
-// Configure axios base URL
-const API_BASE_URL = "http://localhost:8000";
+import { logError } from "../../utils/logger";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -26,24 +24,18 @@ const AddProduct = () => {
   const [errors, setErrors] = useState({});
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Fetch categories on component mount
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await axios.get(`${API_BASE_URL}/products/categories`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get("/products/categories");
       setCategories(response.data);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      logError("Error fetching categories:", error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -169,14 +161,12 @@ const AddProduct = () => {
     }
 
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await axios.post(
-        `${API_BASE_URL}/products/`,
+      const response = await api.post(
+        "/products/",
         formDataToSend,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
           },
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
@@ -191,12 +181,12 @@ const AddProduct = () => {
 
       if (response.status === 200 || response.status === 201) {
         // Show success message
-        alert("Product created successfully!");
+        toast.success("Product created successfully!");
         // Navigate to products list or product detail page
         navigate("/products");
       }
     } catch (error) {
-      console.error("Error creating product:", error);
+      logError("Error creating product:", error);
 
       if (error.response) {
         // Server responded with error
@@ -206,7 +196,7 @@ const AddProduct = () => {
         if (error.response.status === 400) {
           setErrors({ submit: errorMessage });
         } else if (error.response.status === 401) {
-          alert("Please login to continue");
+          toast.error("Please login to continue");
           navigate("/login");
         } else if (error.response.status === 413) {
           setErrors({ file: "File too large. Maximum size is 5MB" });

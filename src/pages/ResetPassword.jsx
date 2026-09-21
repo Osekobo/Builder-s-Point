@@ -1,14 +1,14 @@
 // src/pages/ResetPassword.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FiLock, FiCheck, FiArrowLeft, FiShield, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FaLock, FaCheck, FaArrowLeft, FaShieldHalved, FaCircleExclamation, FaCircleCheck } from 'react-icons/fa6';
 import api from '../api/client';
 
 const ResetPassword = () => {
-  const [otp, setOtp] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email] = useState(() => sessionStorage.getItem("reset_email") || "");
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -16,14 +16,10 @@ const ResetPassword = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get email from sessionStorage
-    const storedEmail = sessionStorage.getItem('reset_email');
-    if (!storedEmail) {
-      navigate('/forgot-password');
-    } else {
-      setEmail(storedEmail);
+    if (!email) {
+      navigate("/forgot-password");
     }
-  }, [navigate]);
+  }, [email, navigate]);
 
   const validatePassword = (pass) => {
     if (pass.length < 6) {
@@ -74,11 +70,11 @@ const ResetPassword = () => {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
         <div className="max-w-md w-full">
           <div className="bg-white border-4 border-black shadow-hard-lg p-8 text-center">
             <div className="mx-auto flex items-center justify-center w-20 h-20 bg-green-100 border-4 border-green-500 mb-6">
-              <FiCheck className="h-10 w-10 text-green-600" />
+              <FaCheck className="h-10 w-10 text-green-600" />
             </div>
             <h2 className="font-h text-2xl font-bold text-black uppercase mb-2">Password Reset!</h2>
             <div className="brick-line mx-auto mb-4"></div>
@@ -101,22 +97,20 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
       <div className="max-w-md w-full">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiShield className="w-8 h-8 text-white" />
+            <FaShieldHalved className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl font-bold text-black uppercase tracking-tight">Reset Password</h1>
           <div className="brick-line mx-auto mt-4"></div>
         </div>
 
-        {/* Reset Password Card */}
         <div className="bg-white border-4 border-black shadow-hard-lg p-8">
           <div className="text-center mb-6">
             <Link to="/forgot-password" className="inline-flex items-center text-sm text-terra hover:text-terra-dark font-semibold transition-colors group">
-              <FiArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Forgot Password
+              <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" /> Back to Forgot Password
             </Link>
           </div>
 
@@ -129,7 +123,7 @@ const ResetPassword = () => {
 
           {error && (
             <div className="bg-red-100 border-2 border-red-500 text-red-700 px-4 py-3 mb-4 flex items-start space-x-2">
-              <FiAlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <FaCircleExclamation className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold">Error</p>
                 <p className="text-sm">{error}</p>
@@ -138,14 +132,13 @@ const ResetPassword = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* OTP Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Reset Code (OTP)
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-ash" />
+                  <FaLock className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="text"
@@ -163,14 +156,13 @@ const ResetPassword = () => {
               </p>
             </div>
 
-            {/* New Password Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 New Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-ash" />
+                  <FaLock className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="password"
@@ -187,7 +179,7 @@ const ResetPassword = () => {
               </div>
               {passwordError && (
                 <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <FiAlertCircle className="w-3 h-3 mr-1" />
+                  <FaCircleExclamation className="w-3 h-3 mr-1" />
                   {passwordError}
                 </p>
               )}
@@ -196,14 +188,13 @@ const ResetPassword = () => {
               </p>
             </div>
 
-            {/* Confirm Password Field */}
             <div className="mb-6">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Confirm New Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-ash" />
+                  <FaLock className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="password"
@@ -217,13 +208,13 @@ const ResetPassword = () => {
               </div>
               {confirmPassword && newPassword !== confirmPassword && (
                 <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <FiAlertCircle className="w-3 h-3 mr-1" />
+                  <FaCircleExclamation className="w-3 h-3 mr-1" />
                   Passwords do not match
                 </p>
               )}
               {confirmPassword && newPassword === confirmPassword && newPassword.length >= 6 && (
                 <p className="text-green-600 text-xs mt-1 flex items-center">
-                  <FiCheckCircle className="w-3 h-3 mr-1" />
+                  <FaCircleCheck className="w-3 h-3 mr-1" />
                   Passwords match
                 </p>
               )}
@@ -241,7 +232,7 @@ const ResetPassword = () => {
                 </>
               ) : (
                 <>
-                  <FiLock className="w-5 h-5" />
+                  <FaLock className="w-5 h-5" />
                   <span>Reset Password</span>
                 </>
               )}
@@ -264,10 +255,9 @@ const ResetPassword = () => {
             </div>
           </div>
 
-          {/* Security Note */}
           <div className="mt-6 pt-6 border-t-2 border-black text-center">
             <p className="text-xs text-ash flex items-center justify-center space-x-1">
-              <FiShield className="w-3 h-3 text-terra" />
+              <FaShieldHalved className="w-3 h-3 text-terra" />
               <span>Your new password will be encrypted</span>
             </p>
           </div>

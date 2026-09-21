@@ -3,8 +3,45 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color: #403b36;
+    background: #f8f6f2;
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-gray-50;
+    @apply bg-gray-50 text-gray-700;
+    margin: 0;
+    min-width: 320px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-h {
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: 0;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    border-radius: 0.75rem;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid rgba(190, 116, 81, 0.35);
+    outline-offset: 2px;
   }
 }
 
@@ -13,32 +50,32 @@
   .nav-link {
     @apply text-gray-700 hover:text-terra transition-colors duration-200;
   }
-  
+
   .nav-link-active {
     @apply text-terra font-semibold;
   }
-  
+
   .mobile-nav-item {
     @apply flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-terra/10 hover:text-terra rounded-lg transition-colors;
   }
-  
+
   .mobile-nav-item-danger {
     @apply flex items-center space-x-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors;
   }
-  
+
   /* Sidebar menu animation */
   .sidebar-enter {
     @apply transform transition-transform duration-300 ease-out;
   }
-  
+
   .sidebar-enter-active {
     @apply translate-x-0;
   }
-  
+
   .sidebar-exit {
     @apply translate-x-full;
   }
-  
+
   /* Cart badge */
   .cart-badge {
     @apply absolute -top-2 -right-2 bg-terra text-white text-xs rounded-full w-5 h-5 flex items-center justify-center;
@@ -52,17 +89,17 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   /* Prevent body scroll when mobile menu is open */
   .body-no-scroll {
     @apply overflow-hidden;
   }
-  
+
   /* Marquee animation */
   .animate-marquee {
     animation: marquee 25s linear infinite;
   }
-  
+
   .animate-marquee:hover {
     animation-play-state: paused;
   }
@@ -85,7 +122,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -169,60 +207,134 @@ html {
 /* ========== KIONE HARDWARE CUSTOM COLORS ========== */
 
 :root {
-  --c-terra: #E04E00;
-  --c-terra-dark: #B83E00;
-  --c-black: #121518;
-  --c-sand: #D6B896;
-  --c-ash: #4A4641;
-  --c-warm: #FBF6EF;
+  --c-terra: #be7451;
+  --c-terra-dark: #995a3f;
+  --c-black: #403b36;
+  --c-sand: #d8c6ae;
+  --c-ash: #706961;
+  --c-warm: #f8f6f2;
 }
 
 /* Background Colors */
-.bg-terra { background-color: var(--c-terra); }
-.bg-terra-dark { background-color: var(--c-terra-dark); }
-.bg-terra\/10 { background-color: rgba(224, 78, 0, 0.1); }
-.bg-terra\/20 { background-color: rgba(224, 78, 0, 0.2); }
-.bg-terra\/30 { background-color: rgba(224, 78, 0, 0.3); }
-.bg-terra\/40 { background-color: rgba(224, 78, 0, 0.4); }
-.bg-terra\/50 { background-color: rgba(224, 78, 0, 0.5); }
-.bg-terra\/60 { background-color: rgba(224, 78, 0, 0.6); }
-.bg-terra\/70 { background-color: rgba(224, 78, 0, 0.7); }
-.bg-terra\/80 { background-color: rgba(224, 78, 0, 0.8); }
-.bg-terra\/90 { background-color: rgba(224, 78, 0, 0.9); }
-.bg-sand { background-color: var(--c-sand); }
-.bg-black-custom { background-color: var(--c-black); }
-.bg-ash { background-color: var(--c-ash); }
-.bg-warm { background-color: var(--c-warm); }
+.bg-terra {
+  background-color: var(--c-terra);
+}
+.bg-terra-dark {
+  background-color: var(--c-terra-dark);
+}
+.bg-terra\/10 {
+  background-color: rgba(224, 78, 0, 0.1);
+}
+.bg-terra\/20 {
+  background-color: rgba(224, 78, 0, 0.2);
+}
+.bg-terra\/30 {
+  background-color: rgba(224, 78, 0, 0.3);
+}
+.bg-terra\/40 {
+  background-color: rgba(224, 78, 0, 0.4);
+}
+.bg-terra\/50 {
+  background-color: rgba(224, 78, 0, 0.5);
+}
+.bg-terra\/60 {
+  background-color: rgba(224, 78, 0, 0.6);
+}
+.bg-terra\/70 {
+  background-color: rgba(224, 78, 0, 0.7);
+}
+.bg-terra\/80 {
+  background-color: rgba(224, 78, 0, 0.8);
+}
+.bg-terra\/90 {
+  background-color: rgba(224, 78, 0, 0.9);
+}
+.bg-sand {
+  background-color: var(--c-sand);
+}
+.bg-black-custom {
+  background-color: var(--c-black);
+}
+.bg-ash {
+  background-color: var(--c-ash);
+}
+.bg-warm {
+  background-color: var(--c-warm);
+}
 
 /* Text Colors */
-.text-terra { color: var(--c-terra); }
-.text-terra-dark { color: var(--c-terra-dark); }
-.text-sand { color: var(--c-sand); }
-.text-ash { color: var(--c-ash); }
-.text-warm { color: var(--c-warm); }
-.text-black-custom { color: var(--c-black); }
+.text-terra {
+  color: var(--c-terra);
+}
+.text-terra-dark {
+  color: var(--c-terra-dark);
+}
+.text-sand {
+  color: var(--c-sand);
+}
+.text-ash {
+  color: var(--c-ash);
+}
+.text-warm {
+  color: var(--c-warm);
+}
+.text-black-custom {
+  color: var(--c-black);
+}
 
 /* Border Colors */
-.border-terra { border-color: var(--c-terra); }
-.border-terra-dark { border-color: var(--c-terra-dark); }
-.border-sand { border-color: var(--c-sand); }
-.border-ash { border-color: var(--c-ash); }
-.border-warm { border-color: var(--c-warm); }
-.border-black-custom { border-color: var(--c-black); }
+.border-terra {
+  border-color: var(--c-terra);
+}
+.border-terra-dark {
+  border-color: var(--c-terra-dark);
+}
+.border-sand {
+  border-color: var(--c-sand);
+}
+.border-ash {
+  border-color: var(--c-ash);
+}
+.border-warm {
+  border-color: var(--c-warm);
+}
+.border-black-custom {
+  border-color: var(--c-black);
+}
 
 /* Hover Backgrounds */
-.hover\:bg-terra:hover { background-color: var(--c-terra); }
-.hover\:bg-terra-dark:hover { background-color: var(--c-terra-dark); }
-.hover\:bg-terra\/10:hover { background-color: rgba(224, 78, 0, 0.1); }
-.hover\:bg-terra\/20:hover { background-color: rgba(224, 78, 0, 0.2); }
-.hover\:bg-sand:hover { background-color: var(--c-sand); }
-.hover\:bg-warm:hover { background-color: var(--c-warm); }
+.hover\:bg-terra:hover {
+  background-color: var(--c-terra);
+}
+.hover\:bg-terra-dark:hover {
+  background-color: var(--c-terra-dark);
+}
+.hover\:bg-terra\/10:hover {
+  background-color: rgba(224, 78, 0, 0.1);
+}
+.hover\:bg-terra\/20:hover {
+  background-color: rgba(224, 78, 0, 0.2);
+}
+.hover\:bg-sand:hover {
+  background-color: var(--c-sand);
+}
+.hover\:bg-warm:hover {
+  background-color: var(--c-warm);
+}
 
 /* Hover Text Colors */
-.hover\:text-terra:hover { color: var(--c-terra); }
-.hover\:text-terra-dark:hover { color: var(--c-terra-dark); }
-.hover\:text-sand:hover { color: var(--c-sand); }
-.hover\:text-warm:hover { color: var(--c-warm); }
+.hover\:text-terra:hover {
+  color: var(--c-terra);
+}
+.hover\:text-terra-dark:hover {
+  color: var(--c-terra-dark);
+}
+.hover\:text-sand:hover {
+  color: var(--c-sand);
+}
+.hover\:text-warm:hover {
+  color: var(--c-warm);
+}
 
 /* Focus Rings */
 .focus\:ring-terra:focus {
@@ -287,6 +399,53 @@ html {
   --tw-ring-color: var(--c-terra);
 }
 
+/* Shared surface defaults keep legacy page markup calm and consistent. */
+.border-black {
+  border-color: #e5ded4;
+}
+
+.border-4 {
+  border-width: 1px;
+}
+
+.border-2 {
+  border-width: 1px;
+}
+
+.border-b-4 {
+  border-bottom-width: 1px;
+}
+
+.border-t-8 {
+  border-top-width: 4px;
+}
+
+.shadow-hard,
+.shadow-hard-black,
+.shadow-hard-sand,
+.shadow-hard-sm,
+.shadow-hard-lg {
+  box-shadow: 0 12px 30px rgba(91, 75, 62, 0.1);
+}
+
+.hover\:shadow-hard-sm:hover {
+  box-shadow: 0 16px 34px rgba(91, 75, 62, 0.14);
+}
+
+.hover\:shadow-none:hover {
+  box-shadow: 0 8px 20px rgba(91, 75, 62, 0.08);
+}
+
+.border-4:not(.rounded-full),
+.border-2:not(.rounded-full) {
+  border-radius: 0.875rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #a39a90;
+}
+
 /* Active Backgrounds */
 .active\:bg-terra:active {
   background-color: var(--c-terra);
@@ -315,7 +474,13 @@ html {
 /* Brick Line Pattern for Kione Hardware */
 .brick-line {
   height: 6px;
-  background: repeating-linear-gradient(90deg, var(--c-terra) 0, var(--c-terra) 24px, transparent 24px, transparent 36px);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--c-terra) 0,
+    var(--c-terra) 24px,
+    transparent 24px,
+    transparent 36px
+  );
   width: 100%;
   max-width: 120px;
   margin-left: auto;
@@ -324,7 +489,13 @@ html {
 
 .brick-line-large {
   height: 8px;
-  background: repeating-linear-gradient(90deg, var(--c-terra) 0, var(--c-terra) 32px, transparent 32px, transparent 48px);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--c-terra) 0,
+    var(--c-terra) 32px,
+    transparent 32px,
+    transparent 48px
+  );
   width: 100%;
   max-width: 160px;
   margin-left: auto;
@@ -350,7 +521,9 @@ html {
 
 /* Transition for hard shadow hover effects */
 .transition-hard {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .hover\:shadow-hard-sm:hover {
   box-shadow: 4px 4px 0 var(--c-terra);

@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import { FiUser, FiMail, FiLock, FiPhone, FiUserPlus, FiShield, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaUserPlus, FaShieldHalved, FaCircleCheck, FaCircleExclamation } from 'react-icons/fa6';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -51,7 +52,7 @@ const Register = () => {
     
     // Check if passwords match
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     
@@ -105,19 +106,17 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
       <div className="max-w-md w-full">
-        {/* Logo / Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiUserPlus className="w-8 h-8 text-white" />
+            <FaUserPlus className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl font-bold text-black uppercase tracking-tight">Join Kione</h1>
           <p className="text-ash mt-2">Create your account to start shopping</p>
           <div className="brick-line mx-auto mt-4"></div>
         </div>
 
-        {/* Register Card */}
         <div className="bg-white border-4 border-black shadow-hard-lg p-8">
           <h2 className="font-h text-2xl font-bold text-black text-center mb-6 uppercase">
             Create Account
@@ -126,7 +125,7 @@ const Register = () => {
           {errorMessage && (
             <div className={`border-2 mb-4 p-4 ${errorMessage.includes('already registered') ? 'bg-yellow-50 border-yellow-500 text-yellow-700' : 'bg-red-100 border-red-500 text-red-700'}`}>
               <div className="flex items-start space-x-2">
-                <FiAlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <FaCircleExclamation className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">
                     {errorMessage.includes('already registered') ? 'Account Exists' : 'Registration Error'}
@@ -145,14 +144,13 @@ const Register = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Full Name Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Full Name *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="h-5 w-5 text-ash" />
+                  <FaUser className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="text"
@@ -166,14 +164,13 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Email Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Email Address *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-ash" />
+                  <FaEnvelope className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="email"
@@ -187,7 +184,6 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Phone Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Phone Number
@@ -195,7 +191,7 @@ const Register = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiPhone className="h-5 w-5 text-ash" />
+                  <FaPhone className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="tel"
@@ -208,23 +204,22 @@ const Register = () => {
               </div>
               {phoneError && (
                 <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <FiAlertCircle className="w-3 h-3 mr-1" />
+                  <FaCircleExclamation className="w-3 h-3 mr-1" />
                   {phoneError}
                 </p>
               )}
               <p className="text-ash text-xs mt-1">
-                ✓ Used for order updates and delivery notifications
+                ✓ Used for order updates
               </p>
             </div>
 
-            {/* Password Field */}
             <div className="mb-4">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Password *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-ash" />
+                  <FaLock className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="password"
@@ -241,7 +236,7 @@ const Register = () => {
               </div>
               {passwordError && (
                 <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <FiAlertCircle className="w-3 h-3 mr-1" />
+                  <FaCircleExclamation className="w-3 h-3 mr-1" />
                   {passwordError}
                 </p>
               )}
@@ -250,14 +245,13 @@ const Register = () => {
               </p>
             </div>
 
-            {/* Confirm Password Field */}
             <div className="mb-6">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Confirm Password *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-ash" />
+                  <FaLock className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="password"
@@ -271,19 +265,18 @@ const Register = () => {
               </div>
               {confirmPassword && password !== confirmPassword && (
                 <p className="text-red-500 text-xs mt-1 flex items-center">
-                  <FiAlertCircle className="w-3 h-3 mr-1" />
+                  <FaCircleExclamation className="w-3 h-3 mr-1" />
                   Passwords do not match
                 </p>
               )}
               {confirmPassword && password === confirmPassword && password.length >= 6 && (
                 <p className="text-green-600 text-xs mt-1 flex items-center">
-                  <FiCheckCircle className="w-3 h-3 mr-1" />
+                  <FaCircleCheck className="w-3 h-3 mr-1" />
                   Passwords match
                 </p>
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -296,14 +289,13 @@ const Register = () => {
                 </>
               ) : (
                 <>
-                  <FiUserPlus className="w-5 h-5" />
+                  <FaUserPlus className="w-5 h-5" />
                   <span>Create Account</span>
                 </>
               )}
             </button>
           </form>
 
-          {/* Login Link */}
           <div className="mt-6 text-center">
             <p className="text-ash">
               Already have an account?{' '}
@@ -313,7 +305,6 @@ const Register = () => {
             </p>
           </div>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t-2 border-black"></div>
@@ -323,10 +314,9 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Security Note */}
           <div className="text-center text-xs text-ash">
             <p className="flex items-center justify-center space-x-1">
-              <FiShield className="w-3 h-3" />
+              <FaShieldHalved className="w-3 h-3" />
               <span>Your data is protected</span>
             </p>
             <p className="mt-2">
@@ -342,7 +332,6 @@ const Register = () => {
           </div>
         </div>
 
-        {/* Help Text */}
         <div className="text-center mt-6">
           <p className="text-xs text-ash">
             Need help?{' '}

@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/client';
-import { 
-  FiPackage, FiPlusCircle, FiList, FiShoppingBag, FiUsers, 
-  FiTrendingUp, FiDollarSign, FiShield, FiClock, FiAlertTriangle,
-  FiXCircle, FiCalendar, FiEye, FiRefreshCw, FiUser, FiUserX 
-} from 'react-icons/fi';
+import { logError } from '../../utils/logger';
+import {
+  FaCube, FaCirclePlus, FaList, FaBagShopping, FaUsers,
+  FaArrowTrendUp, FaDollarSign, FaShieldHalved, FaTriangleExclamation,
+  FaCircleXmark, FaCalendarDays, FaEye, FaRotate, FaUser, FaUserXmark
+} from 'react-icons/fa6';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -21,81 +22,65 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCancelledOrder, setSelectedCancelledOrder] = useState(null);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch products
-      const productsResponse = await api.get('/products/');
+      const productsResponse = await api.get('/products/?limit=100');
       let products = [];
       if (Array.isArray(productsResponse.data)) {
         products = productsResponse.data;
       } else if (productsResponse.data.products) {
         products = productsResponse.data.products;
       }
-      
-      // Fetch orders with user details
-      const ordersResponse = await api.get('/orders/').catch(() => ({ data: [] }));
+
+      const ordersResponse = await api.get('/orders/admin/all').catch(() => ({ data: [] }));
       let orders = Array.isArray(ordersResponse.data) ? ordersResponse.data : [];
-      
-      // Enhance orders with user information if available
-      const usersResponse = await api.get('/users/').catch(() => ({ data: [] }));
-      const users = Array.isArray(usersResponse.data) ? usersResponse.data : [];
-      
-      // Create a user lookup map
-      const userMap = new Map();
-      users.forEach(user => {
-        userMap.set(user.id, user);
-      });
-      
-      // Attach user details to orders
+
       orders = orders.map(order => ({
         ...order,
-        user_details: order.user_id ? userMap.get(order.user_id) : null
+        customer_name: order.user_name || null,
+        customer_email: order.user_email || null
       }));
-      
-      // Separate cancelled orders
+
       const activeOrders = orders.filter(order => order.status !== 'cancelled');
       const cancelledOrders = orders.filter(order => order.status === 'cancelled');
-      
-      // Calculate totals (excluding cancelled orders)
+
       const totalProducts = products.length;
       const totalOrders = activeOrders.length;
       const totalRevenue = activeOrders.reduce((sum, order) => sum + (order.total || 0), 0);
-      
-      // Get recent orders (last 5 active orders)
+      const totalUsers = new Set(orders.map(order => order.user_id).filter(Boolean)).size;
+
       const recentOrders = [...activeOrders]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 5);
-      
-      // Get recent cancelled orders (last 10) with user details
+
       const recentCancelledOrders = [...cancelledOrders]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 10);
-      
-      // Get low stock products
+
       const lowStockProducts = products.filter(p => p.stock > 0 && p.stock <= 10);
       const outOfStockProducts = products.filter(p => p.stock === 0);
-      
+
       setStats({
         totalProducts,
         totalOrders,
         totalRevenue,
-        totalUsers: users.length,
+        totalUsers,
         recentOrders,
         cancelledOrders: recentCancelledOrders,
         lowStockProducts,
         outOfStockProducts
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      logError('Error fetching dashboard data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const formatMoney = (amount) => {
     return `KSh ${amount?.toLocaleString() || 0}`;
@@ -113,40 +98,40 @@ const AdminDashboard = () => {
   };
 
   const statCards = [
-    { title: 'Total Products', value: stats.totalProducts, icon: FiPackage, color: 'bg-terra' },
-    { title: 'Total Orders', value: stats.totalOrders, icon: FiShoppingBag, color: 'bg-terra' },
-    { title: 'Total Revenue', value: formatMoney(stats.totalRevenue), icon: FiDollarSign, color: 'bg-terra' },
-    { title: 'Total Users', value: stats.totalUsers, icon: FiUsers, color: 'bg-terra' },
-    { title: 'Cancelled Orders', value: stats.cancelledOrders.length, icon: FiXCircle, color: 'bg-red-600' },
-    { title: 'Low Stock Items', value: stats.lowStockProducts.length, icon: FiAlertTriangle, color: 'bg-orange-600' },
+    { title: 'Total Products', value: stats.totalProducts, icon: FaCube, color: 'bg-terra' },
+    { title: 'Total Orders', value: stats.totalOrders, icon: FaBagShopping, color: 'bg-terra' },
+    { title: 'Total Revenue', value: formatMoney(stats.totalRevenue), icon: FaDollarSign, color: 'bg-terra' },
+    { title: 'Total Users', value: stats.totalUsers, icon: FaUsers, color: 'bg-terra' },
+    { title: 'Cancelled Orders', value: stats.cancelledOrders.length, icon: FaCircleXmark, color: 'bg-red-600' },
+    { title: 'Low Stock Items', value: stats.lowStockProducts.length, icon: FaTriangleExclamation, color: 'bg-orange-600' },
   ];
 
   const adminActions = [
     {
       title: 'Add New Product',
       description: 'Add a new product to your store',
-      icon: FiPlusCircle,
+      icon: FaCirclePlus,
       link: '/admin/add-product',
       color: 'bg-terra'
     },
     {
       title: 'Manage Products',
       description: 'Edit or delete existing products',
-      icon: FiList,
+      icon: FaList,
       link: '/admin/products',
       color: 'bg-terra'
     },
     {
       title: 'View Orders',
       description: 'Manage customer orders',
-      icon: FiShoppingBag,
+      icon: FaBagShopping,
       link: '/orders',
       color: 'bg-terra'
     },
     {
       title: 'View Cancelled Orders',
       description: 'Review cancelled customer orders',
-      icon: FiXCircle,
+      icon: FaCircleXmark,
       link: '/admin/cancelled-orders',
       color: 'bg-red-600'
     },
@@ -161,26 +146,27 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-warm py-8 px-4">
-      <div className="container mx-auto max-w-7xl">
-        {/* Page Header */}
+    <div className="min-h-screen bg-warm py-3 px-3 md:py-4">
+      <div className="mx-auto w-full max-w-[1600px]">
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiShield className="w-8 h-8 text-white" />
+            <FaShieldHalved className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl md:text-4xl font-bold text-black uppercase mb-2">Admin Dashboard</h1>
           <div className="brick-line mx-auto"></div>
           <p className="text-ash mt-2">Welcome back! Here's what's happening with your store today.</p>
-          <button 
+          <button
             onClick={fetchDashboardData}
             className="mt-4 inline-flex items-center gap-2 text-terra hover:text-terra-dark text-sm font-bold"
+            type="button"
           >
-            <FiRefreshCw className="w-4 h-4" />
+            <FaRotate className="w-4 h-4" />
             Refresh Data
           </button>
         </div>
-        
-        {/* Stats Cards */}
+
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
           {statCards.map((stat, index) => (
             <div key={index} className="bg-white border-4 border-black shadow-hard-sm p-4 hover:-translate-y-1 transition-all duration-300">
@@ -197,9 +183,9 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Quick Actions */}
+
         <h2 className="font-h text-2xl font-bold text-black uppercase mb-6 flex items-center">
-          <FiTrendingUp className="mr-2 text-terra" />
+          <FaArrowTrendUp className="mr-2 text-terra" />
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -222,11 +208,11 @@ const AdminDashboard = () => {
           ))}
         </div>
 
-        {/* Cancelled Orders Section - Enhanced with User Info */}
+
         {stats.cancelledOrders.length > 0 && (
           <div className="mb-8">
             <h2 className="font-h text-2xl font-bold text-black uppercase mb-6 flex items-center">
-              <FiXCircle className="mr-2 text-red-600" />
+              <FaCircleXmark className="mr-2 text-red-600" />
               Recently Cancelled Orders
             </h2>
             <div className="bg-red-50 border-4 border-red-600 shadow-hard-sm p-6">
@@ -235,75 +221,51 @@ const AdminDashboard = () => {
                   <div key={order.id} className="bg-white border-2 border-red-500 p-4 hover:shadow-md transition-shadow">
                     <div className="flex flex-wrap justify-between items-start gap-4">
                       <div className="flex-1">
-                        {/* Order ID and Status */}
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <p className="font-bold text-black text-lg">Order #{order.id}</p>
                           <span className={`text-xs px-2 py-0.5 border font-bold ${getOrderStatusBadge(order.status)}`}>
                             {order.status?.toUpperCase() || 'CANCELLED'}
                           </span>
                           <span className="flex items-center gap-1 text-xs text-gray-500">
-                            <FiCalendar className="w-3 h-3" />
+                            <FaCalendarDays className="w-3 h-3" />
                             {new Date(order.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        
-                        {/* WHO ORDERED - Customer Information */}
+
                         <div className="mb-2 p-2 bg-green-50 border-l-4 border-green-500">
                           <p className="text-sm text-gray-600 flex items-center gap-2">
-                            <FiUser className="text-green-600" />
+                            <FaUser className="text-green-600" />
                             <span className="font-bold">Ordered by:</span>
-                            {order.user_details ? (
+                            {order.customer_name ? (
                               <>
-                                <span className="font-semibold text-black">{order.user_details.name}</span>
-                                <span className="text-gray-500">({order.user_details.email})</span>
+                                <span className="font-semibold text-black">{order.customer_name}</span>
+                                {order.customer_email && (
+                                  <span className="text-gray-500">({order.customer_email})</span>
+                                )}
                               </>
-                            ) : order.customer_name ? (
-                              <span className="font-semibold text-black">{order.customer_name}</span>
                             ) : (
                               <span className="text-gray-500">User not found</span>
                             )}
                           </p>
                         </div>
-                        
-                        {/* WHO CANCELLED - Cancellation Information */}
+
                         <div className="p-2 bg-red-50 border-l-4 border-red-500">
                           <p className="text-sm text-gray-600 flex items-center gap-2">
-                            <FiUserX className="text-red-600" />
-                            <span className="font-bold">Cancelled by:</span>
-                            {order.cancelled_by ? (
-                              <>
-                                <span className="font-semibold text-red-700">{order.cancelled_by}</span>
-                                {order.cancelled_by !== order.user_details?.name && (
-                                  <span className="text-xs text-red-500">(Admin action)</span>
-                                )}
-                              </>
-                            ) : order.user_details ? (
-                              <span className="font-semibold text-red-700">{order.user_details.name} (Customer self-cancelled)</span>
-                            ) : (
-                              <span className="text-gray-500">Unknown</span>
-                            )}
+                            <FaUserXmark className="text-red-600" />
+                            <span className="font-bold">Reason:</span>
+                            <span className="font-semibold text-red-700">{order.payment_error || 'No reason provided'}</span>
                           </p>
-                          {order.cancelled_at && (
-                            <p className="text-xs text-gray-500 mt-1 ml-6">
-                              Cancelled on: {new Date(order.cancelled_at).toLocaleString()}
-                            </p>
-                          )}
-                          {order.cancellation_reason && (
-                            <p className="text-sm text-red-600 mt-1 ml-6">
-                              <span className="font-bold">Reason:</span> {order.cancellation_reason}
-                            </p>
-                          )}
                         </div>
                       </div>
-                      
-                      {/* Order Total and Action */}
+
                       <div className="text-right">
                         <p className="font-bold text-red-600 text-lg">{formatMoney(order.total || 0)}</p>
-                        <button 
+                        <button
                           onClick={() => setSelectedCancelledOrder(order)}
                           className="mt-2 inline-flex items-center gap-1 text-terra hover:text-terra-dark text-sm font-bold uppercase"
+                          type="button"
                         >
-                          <FiEye className="w-4 h-4" />
+                          <FaEye className="w-4 h-4" />
                           View Details
                         </button>
                       </div>
@@ -311,7 +273,7 @@ const AdminDashboard = () => {
                   </div>
                 ))}
               </div>
-              
+
               {stats.cancelledOrders.length > 0 && (
                 <Link
                   to="/admin/cancelled-orders"
@@ -324,20 +286,19 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Inventory Alerts Section (same as before) */}
+
         {(stats.lowStockProducts.length > 0 || stats.outOfStockProducts.length > 0) && (
           <div className="mb-8">
             <h2 className="font-h text-2xl font-bold text-black uppercase mb-6 flex items-center">
-              <FiAlertTriangle className="mr-2 text-orange-600" />
+              <FaTriangleExclamation className="mr-2 text-orange-600" />
               Inventory Alerts
             </h2>
-            
-            {/* Out of Stock - Critical */}
+
             {stats.outOfStockProducts.length > 0 && (
               <div className="mb-6 bg-red-50 border-4 border-red-500 shadow-hard-sm p-6">
                 <div className="flex items-center mb-4">
                   <div className="bg-red-600 p-2 border-2 border-black mr-3">
-                    <FiAlertTriangle className="w-5 h-5 text-white" />
+                    <FaTriangleExclamation className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="font-h text-xl font-bold text-red-700 uppercase">Out of Stock - Immediate Action Required</h3>
                 </div>
@@ -359,13 +320,12 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-            
-            {/* Low Stock - Warning */}
+
             {stats.lowStockProducts.length > 0 && (
               <div className="bg-yellow-50 border-4 border-yellow-500 shadow-hard-sm p-6">
                 <div className="flex items-center mb-4">
                   <div className="bg-yellow-600 p-2 border-2 border-black mr-3">
-                    <FiAlertTriangle className="w-5 h-5 text-white" />
+                    <FaTriangleExclamation className="w-5 h-5 text-white" />
                   </div>
                   <h3 className="font-h text-xl font-bold text-yellow-700 uppercase">Low Stock - Needs Attention</h3>
                 </div>
@@ -390,15 +350,12 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Rest of your dashboard (Recent Orders, Products Overview, etc.) */}
-        {/* ... keep your existing code for recent orders and products overview ... */}
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Active Orders */}
           <div className="bg-white border-4 border-black shadow-hard-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-h text-xl font-bold text-black uppercase flex items-center">
-                <FiShoppingBag className="mr-2 text-terra" />
+                <FaBagShopping className="mr-2 text-terra" />
                 Recent Active Orders
               </h2>
               <Link to="/orders" className="text-terra hover:text-terra-dark text-sm font-bold uppercase tracking-wider transition-colors">
@@ -416,8 +373,8 @@ const AdminDashboard = () => {
                     <div>
                       <p className="font-bold text-black">Order #{order.id}</p>
                       <div className="flex items-center gap-2 text-xs text-ash mt-1">
-                        <FiUser className="w-3 h-3" />
-                        <span>{order.user_details?.name || order.customer_name || 'Guest'}</span>
+                        <FaUser className="w-3 h-3" />
+                        <span>{order.customer_name || 'Guest'}</span>
                       </div>
                       <p className="text-xs text-ash">{new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
@@ -433,11 +390,10 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Products Overview */}
           <div className="bg-white border-4 border-black shadow-hard-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="font-h text-xl font-bold text-black uppercase flex items-center">
-                <FiPackage className="mr-2 text-terra" />
+                <FaCube className="mr-2 text-terra" />
                 Products Overview
               </h2>
               <Link to="/admin/products" className="text-terra hover:text-terra-dark text-sm font-bold uppercase tracking-wider transition-colors">
@@ -458,7 +414,7 @@ const AdminDashboard = () => {
                 <span className="font-bold text-red-600">{stats.outOfStockProducts.length}</span>
               </div>
             </div>
-            
+
             {(stats.lowStockProducts.length > 0 || stats.outOfStockProducts.length > 0) && (
               <Link
                 to="/admin/products"
@@ -472,26 +428,25 @@ const AdminDashboard = () => {
 
         <div className="mt-8 p-6 bg-terra/10 border-4 border-terra text-center">
           <p className="text-sm text-black font-semibold">
-            💡 Pro Tip: Monitor cancelled orders to identify potential issues with products or customer satisfaction. Track who cancels most frequently to improve service.
+            Pro Tip: Monitor cancelled orders to identify potential issues with products or customer satisfaction. Track who cancels most frequently to improve service.
           </p>
         </div>
       </div>
 
-      {/* Cancelled Order Details Modal - Enhanced with User Info */}
+
       {selectedCancelledOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedCancelledOrder(null)}>
           <div className="bg-white border-4 border-black shadow-hard-sm max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="bg-red-600 p-4 border-b-4 border-black sticky top-0">
               <div className="flex justify-between items-center">
                 <h2 className="font-h text-xl font-bold text-white uppercase">Cancelled Order Details</h2>
-                <button onClick={() => setSelectedCancelledOrder(null)} className="text-white hover:text-gray-200">
-                  <FiXCircle className="w-6 h-6" />
+                <button onClick={() => setSelectedCancelledOrder(null)} className="text-white hover:text-gray-200" type="button">
+                  <FaCircleXmark className="w-6 h-6" />
                 </button>
               </div>
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                {/* Order Information */}
                 <div className="grid grid-cols-2 gap-4 pb-4 border-b">
                   <div>
                     <p className="text-sm text-ash">Order ID</p>
@@ -505,22 +460,21 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Who Ordered Section - Highlighted */}
                 <div className="p-4 bg-green-50 border-2 border-green-500">
                   <h3 className="font-bold text-green-800 uppercase text-sm mb-2 flex items-center gap-2">
-                    <FiUser /> Customer Who Placed Order
+                    <FaUser /> Customer Who Placed Order
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-xs text-gray-600">Name</p>
                       <p className="font-semibold text-black">
-                        {selectedCancelledOrder.user_details?.name || selectedCancelledOrder.customer_name || 'Unknown'}
+                        {selectedCancelledOrder.customer_name || 'Unknown'}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600">Email</p>
                       <p className="font-semibold text-black">
-                        {selectedCancelledOrder.user_details?.email || selectedCancelledOrder.customer_email || 'N/A'}
+                        {selectedCancelledOrder.customer_email || 'N/A'}
                       </p>
                     </div>
                     <div>
@@ -534,40 +488,15 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Who Cancelled Section - Highlighted */}
                 <div className="p-4 bg-red-50 border-2 border-red-500">
                   <h3 className="font-bold text-red-800 uppercase text-sm mb-2 flex items-center gap-2">
-                    <FiUserX /> Who Cancelled This Order
+                    <FaUserXmark /> Cancellation Reason
                   </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-xs text-gray-600">Cancelled By</p>
-                      <p className="font-semibold text-red-700">
-                        {selectedCancelledOrder.cancelled_by || 
-                         (selectedCancelledOrder.user_details?.name ? `${selectedCancelledOrder.user_details.name} (Self-cancelled)` : 'Unknown')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">Cancelled At</p>
-                      <p className="font-semibold text-black">
-                        {selectedCancelledOrder.cancelled_at ? new Date(selectedCancelledOrder.cancelled_at).toLocaleString() : 'N/A'}
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-gray-600">Cancellation Reason</p>
-                      <p className="font-semibold text-red-600">{selectedCancelledOrder.cancellation_reason || 'No reason provided'}</p>
-                    </div>
-                    {/* Check if admin cancelled */}
-                    {selectedCancelledOrder.cancelled_by && 
-                     selectedCancelledOrder.cancelled_by !== selectedCancelledOrder.user_details?.name && (
-                      <div className="col-span-2">
-                        <p className="text-xs text-orange-600 font-semibold">⚠️ This order was cancelled by an admin, not the customer</p>
-                      </div>
-                    )}
-                  </div>
+                  <p className="font-semibold text-red-700">
+                    {selectedCancelledOrder.payment_error || 'No reason provided'}
+                  </p>
                 </div>
 
-                {/* Order Items */}
                 <div>
                   <p className="text-sm text-ash font-bold mb-2">Order Items</p>
                   <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -583,7 +512,6 @@ const AdminDashboard = () => {
                   </div>
                 </div>
 
-                {/* Order Total */}
                 <div className="pt-4 border-t flex justify-between items-center">
                   <p className="font-bold text-black">Total Amount</p>
                   <p className="font-bold text-red-600 text-xl">{formatMoney(selectedCancelledOrder.total || 0)}</p>

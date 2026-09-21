@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
-import { FiMail, FiLock, FiLogIn, FiShield } from 'react-icons/fi';
+import { FaEnvelope, FaLock, FaArrowRightToBracket, FaShieldHalved } from 'react-icons/fa6';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Clear any stale errors when login page loads
   useEffect(() => {
@@ -18,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     const result = await login(email, password);
     if (result.success) {
-      navigate('/');
+      navigate(location.state?.from || "/");
     }
   };
 
@@ -47,19 +48,17 @@ const Login = () => {
   const errorMessage = formatErrorMessage(error);
 
   return (
-    <div className="min-h-screen bg-warm flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-warm flex items-center justify-center py-6 px-4">
       <div className="max-w-md w-full">
-        {/* Logo / Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
-            <FiShield className="w-8 h-8 text-white" />
+            <FaShieldHalved className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-h text-3xl font-bold text-black uppercase tracking-tight">Welcome Back</h1>
           <p className="text-ash mt-2">Sign in to your account</p>
           <div className="brick-line mx-auto mt-4"></div>
         </div>
 
-        {/* Login Card */}
         <div className="bg-white border-4 border-black shadow-hard-lg p-8">
           <h2 className="font-h text-2xl font-bold text-black text-center mb-6 uppercase">
             Login
@@ -73,14 +72,13 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Email Field */}
             <div className="mb-5">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-ash" />
+                  <FaEnvelope className="h-5 w-5 text-ash" />
                 </div>
                 <input
                   type="email"
@@ -93,14 +91,13 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className="mb-6">
               <label className="block text-sm font-bold text-black uppercase tracking-wider mb-2">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 h-5 text-ash" />
+                  <FaLock className="h-5 h-5 text-ash" />
                 </div>
                 <input
                   type="password"
@@ -113,7 +110,6 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Forgot Password Link */}
             <div className="text-right mb-6">
               <Link 
                 to="/forgot-password" 
@@ -123,7 +119,6 @@ const Login = () => {
               </Link>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -136,14 +131,13 @@ const Login = () => {
                 </>
               ) : (
                 <>
-                  <FiLogIn className="w-5 h-5" />
+                  <FaArrowRightToBracket className="w-5 h-5" />
                   <span>Login</span>
                 </>
               )}
             </button>
           </form>
 
-          {/* Register Link */}
           <div className="mt-6 text-center">
             <p className="text-ash">
               Don't have an account?{' '}
@@ -153,7 +147,6 @@ const Login = () => {
             </p>
           </div>
 
-          {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t-2 border-black"></div>
@@ -163,14 +156,12 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Security Note */}
           <div className="text-center text-xs text-ash">
             <p>✓ 100% Secure Login</p>
             <p className="mt-1">✓ Protected by M-Pesa security standards</p>
           </div>
         </div>
 
-        {/* Help Text */}
         <div className="text-center mt-6">
           <p className="text-xs text-ash">
             Having trouble?{' '}
