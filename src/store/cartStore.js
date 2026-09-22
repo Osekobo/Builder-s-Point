@@ -6,8 +6,26 @@ import {
   removeFromCart as removeFromCartApi,
   updateQuantity as updateQuantityApi,
 } from "../api/cart";
-import { isAuthenticated } from "../utils/auth";
 import { logError, logWarn } from "../utils/logger";
+
+let authStorePromise = null;
+
+const getAuthStore = async () => {
+  if (!authStorePromise) {
+    authStorePromise = import("../store/authStore");
+  }
+  const { default: useAuthStore } = await authStorePromise;
+  return useAuthStore;
+};
+
+const isAuthenticated = async () => {
+  try {
+    const useAuthStore = await getAuthStore();
+    return useAuthStore.getState().isAuthenticated();
+  } catch {
+    return false;
+  }
+};
 
 const computeTotal = (items) =>
   items.reduce(
@@ -25,7 +43,7 @@ const useCartStore = create(
       isLoading: false,
 
       fetchCart: async () => {
-        if (!isAuthenticated()) {
+        if (!(await isAuthenticated())) {
           return;
         }
 
@@ -41,7 +59,7 @@ const useCartStore = create(
       },
 
       addToCart: async (productId, quantity = 1) => {
-        if (!isAuthenticated()) {
+        if (!(await isAuthenticated())) {
           logWarn("addToCart requires a session; use addGuestItem for guests");
           return { success: false };
         }
@@ -137,7 +155,7 @@ const useCartStore = create(
       },
 
       mergeGuestCartToServer: async () => {
-        if (!isAuthenticated()) return;
+        if (!(await isAuthenticated())) return;
 
         const guestItems = get().items.filter((item) => isGuestItem(item));
 
