@@ -5,7 +5,6 @@ import {
   logout as logoutApi,
   getMe,
 } from "../api/auth";
-import useCartStore from "./cartStore";
 import { log, logError } from "../utils/logger";
 
 try {
@@ -49,6 +48,8 @@ const useAuthStore = create((set, get) => ({
       const { data: user } = await getMe();
 
       set({ user, isLoading: false, error: null, sessionLoaded: true });
+      
+      const useCartStore = (await import("./cartStore")).default;
       await useCartStore.getState().mergeGuestCartToServer();
 
       return { success: true, user };
@@ -82,6 +83,8 @@ const useAuthStore = create((set, get) => ({
         error: null,
         sessionLoaded: true,
       });
+      
+      const useCartStore = (await import("./cartStore")).default;
       await useCartStore.getState().mergeGuestCartToServer();
 
       return { success: true, user };
@@ -100,7 +103,10 @@ const useAuthStore = create((set, get) => ({
     } catch (error) {
       logError("Logout error:", error);
     }
+    
+    const useCartStore = (await import("./cartStore")).default;
     useCartStore.getState().resetCart();
+    
     set({ user: null, isLoading: false, error: null });
   },
 
