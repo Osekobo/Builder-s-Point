@@ -56,7 +56,6 @@ const useAuthStore = create((set, get) => ({
       return { success: true, user };
     } catch (error) {
       logError("Login error details:", error);
-
       const errorMessage = getErrorMessage(error, "Login failed");
       set({ error: errorMessage, isLoading: false });
       return { success: false, error: errorMessage };
@@ -67,7 +66,6 @@ const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       log("📝 Registering user:", { ...userData, password: "***" });
-
       await registerApi(userData);
       log("✅ Registration successful");
 
@@ -91,7 +89,6 @@ const useAuthStore = create((set, get) => ({
       return { success: true, user };
     } catch (error) {
       logError("❌ Registration error:", error);
-
       const errorMessage = getErrorMessage(error, "Registration failed");
       set({ error: errorMessage, isLoading: false });
       return { success: false, error: errorMessage };
