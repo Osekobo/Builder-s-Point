@@ -6,16 +6,8 @@ import {
   removeFromCart as removeFromCartApi,
   updateQuantity as updateQuantityApi,
 } from "../api/cart";
-import useAuthStore from "./authStore";
+import { isAuthenticated } from "../utils/auth";
 import { logError, logWarn } from "../utils/logger";
-
-const isAuthenticated = () => {
-  try {
-    return useAuthStore.getState().isAuthenticated();
-  } catch {
-    return false;
-  }
-};
 
 const computeTotal = (items) =>
   items.reduce(
