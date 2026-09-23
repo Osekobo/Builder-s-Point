@@ -198,7 +198,7 @@ const AddProduct = () => {
       } else if (error.request) {
         setErrors({
           submit:
-            "Network error. Please check if the backend server is running on http://localhost:8000",
+            "Network error. Please check your connection or contact support.",
         });
       } else {
         setErrors({ submit: "An unexpected error occurred." });
