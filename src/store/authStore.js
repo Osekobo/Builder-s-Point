@@ -1,9 +1,3 @@
-import * as zustand from "zustand";
-import { create as _createCheck } from "zustand";
-
-console.log("[zustand] namespace type:", typeof zustand);
-console.log("[zustand] namespace value:", zustand);
-console.log("[zustand] typeof create (named):", typeof _createCheck);
 import { create } from "zustand";
 import {
   login as loginApi,
