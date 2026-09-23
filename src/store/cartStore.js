@@ -12,10 +12,15 @@ let authStorePromise = null;
 
 const getAuthStore = async () => {
   if (!authStorePromise) {
-    authStorePromise = import("../store/authStore");
+    // Use a consistent relative path — matches the sibling file location.
+    authStorePromise = import("./authStore").catch((err) => {
+      // Reset the cached promise on failure so future calls can retry.
+      authStorePromise = null;
+      throw err;
+    });
   }
-  const { default: useAuthStore } = await authStorePromise;
-  return useAuthStore;
+  const mod = await authStorePromise;
+  return mod.default;
 };
 
 const isAuthenticated = async () => {

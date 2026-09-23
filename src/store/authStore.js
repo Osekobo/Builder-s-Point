@@ -1,4 +1,7 @@
-import { create } from "zustand";
+
+import * as zustand from "zustand";
+console.log("[authStore] zustand keys:", Object.keys(zustand));
+console.log("[authStore] typeof create:", typeof zustand.create);import { create } from "zustand";
 import {
   login as loginApi,
   register as registerApi,
@@ -8,16 +11,20 @@ import {
 import { log, logError } from "../utils/logger";
 import { setAuthStoreRef } from "../utils/auth";
 
-try {
-  localStorage.removeItem("auth-storage");
-} catch (e) {
-  void e;
+// Safely clean up legacy persisted auth state.
+// Wrapped defensively because this module may be evaluated in non-browser contexts.
+if (typeof window !== "undefined" && window.localStorage) {
+  try {
+    window.localStorage.removeItem("auth-storage");
+  } catch {
+    // ignore
+  }
 }
 
 const getErrorMessage = (error, fallback) => {
-  if (error.response?.data?.detail) return error.response.data.detail;
-  if (error.response?.data?.message) return error.response.data.message;
-  if (error.message) return error.message;
+  if (error?.response?.data?.detail) return error.response.data.detail;
+  if (error?.response?.data?.message) return error.response.data.message;
+  if (error?.message) return error.message;
   return fallback;
 };
 
@@ -33,7 +40,7 @@ const useAuthStore = create((set, get) => ({
       const { data: user } = await getMe();
       set({ user, sessionLoaded: true });
     } catch (error) {
-      if (error.response?.status === 401) {
+      if (error?.response?.status === 401) {
         set({ user: null, sessionLoaded: true });
         return;
       }
@@ -50,7 +57,7 @@ const useAuthStore = create((set, get) => ({
 
       set({ user, isLoading: false, error: null, sessionLoaded: true });
 
-      const useCartStore = (await import("./cartStore")).default;
+      const { default: useCartStore } = await import("./cartStore");
       await useCartStore.getState().mergeGuestCartToServer();
 
       return { success: true, user };
@@ -83,7 +90,7 @@ const useAuthStore = create((set, get) => ({
         sessionLoaded: true,
       });
 
-      const useCartStore = (await import("./cartStore")).default;
+      const { default: useCartStore } = await import("./cartStore");
       await useCartStore.getState().mergeGuestCartToServer();
 
       return { success: true, user };
@@ -102,17 +109,19 @@ const useAuthStore = create((set, get) => ({
       logError("Logout error:", error);
     }
 
-    const useCartStore = (await import("./cartStore")).default;
-    useCartStore.getState().resetCart();
+    try {
+      const { default: useCartStore } = await import("./cartStore");
+      useCartStore.getState().resetCart();
+    } catch (error) {
+      logError("Failed to reset cart during logout:", error);
+    }
 
     set({ user: null, isLoading: false, error: null });
   },
 
   clearError: () => set({ error: null }),
 
-  isAuthenticated: () => {
-    return !!get().user;
-  },
+  isAuthenticated: () => !!get().user,
 
   getUserPhone: () => {
     const { user } = get();
@@ -131,12 +140,22 @@ const useAuthStore = create((set, get) => ({
   },
 }));
 
+// --- Register the store reference safely ---
+// This MUST be defensive: if `setAuthStoreRef` is undefined due to a
+// circular dependency in the production bundle, this call would otherwise
+// throw "n is not a function" and crash the entire app at module load.
+if (typeof setAuthStoreRef === "function") {
+  setAuthStoreRef(useAuthStore);
+} else if (typeof window !== "undefined") {
+  logError(
+    "[authStore] setAuthStoreRef is not a function — check for circular imports in utils/auth",
+  );
+}
+
 if (typeof window !== "undefined") {
   window.addEventListener("auth:unauthorized", () => {
     useAuthStore.getState().logout();
   });
 }
-
-setAuthStoreRef(useAuthStore);
 
 export default useAuthStore;
