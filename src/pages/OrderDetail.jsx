@@ -11,11 +11,11 @@ import {
   FaEnvelope,
   FaUser,
   FaCalendarDays,
-  FaPrint,
+  FaDownload,
 } from "react-icons/fa6";
 import useAuthStore from "../store/authStore";
 import useProductStore from "../store/productStore";
-import { getOrderDetails } from "../api/orders";
+import { getOrderDetails, downloadReceipt } from "../api/orders";
 import { logError } from "../utils/logger";
 
 const BUSINESS_NAME = "Kione Hardware";
@@ -112,6 +112,23 @@ const OrderDetail = () => {
     });
   };
 
+  const handleDownloadReceipt = async () => {
+    try {
+      const response = await downloadReceipt(order.id);
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `kione_receipt_${order.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      logError("Error downloading receipt:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64 bg-warm">
@@ -169,11 +186,11 @@ const OrderDetail = () => {
             <span>Back to Orders</span>
           </Link>
           <button
-            onClick={() => window.print()}
+            onClick={handleDownloadReceipt}
             className="flex items-center gap-2 px-4 py-2 bg-gray-200 border-2 border-black hover:bg-gray-300 transition-colors"
           >
-            <FaPrint className="w-4 h-4" />
-            <span className="text-sm font-bold uppercase">Print Receipt</span>
+            <FaDownload className="w-4 h-4" />
+            <span className="text-sm font-bold uppercase">Download Receipt</span>
           </button>
         </div>
 
