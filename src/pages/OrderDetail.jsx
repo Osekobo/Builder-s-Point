@@ -20,7 +20,7 @@ import { logError } from "../utils/logger";
 
 const BUSINESS_NAME = "Kione Hardware";
 const BUSINESS_TAGLINE = "Your Trusted Hardware Store";
-const BUSINESS_ADDRESS = "Nairobi, Kenya";
+const BUSINESS_ADDRESS = "Migori, Kenya";
 
 const OrderDetail = () => {
   const { id } = useParams();

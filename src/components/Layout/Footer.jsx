@@ -30,7 +30,7 @@ const Footer = () => {
               Kione Hardware
             </Link>
             <p className="text-sand/70 mb-4 leading-relaxed">
-              Your trusted hardware and general store serving Nairobi and
+              Your trusted hardware and general store serving Migori and
               beyond with quality building materials, paint, and everyday
               essentials.
             </p>
@@ -185,7 +185,7 @@ const Footer = () => {
             <div className="space-y-3 mb-4">
               <div className="flex items-center space-x-3 text-sand/70">
                 <FaLocationDot className="w-5 h-5 flex-shrink-0 text-terra" />
-                <span>Nairobi, Kenya</span>
+                <span>Migori, Kenya</span>
               </div>
               <div className="flex items-center space-x-3 text-sand/70">
                 <FaPhone className="w-5 h-5 flex-shrink-0 text-terra" />
@@ -230,7 +230,7 @@ const Footer = () => {
               </div>
               <div>
                 <h4 className="font-h font-bold text-terra">Trusted Service</h4>
-                <p className="text-sm text-sand/50">Since day one in Nairobi</p>
+                <p className="text-sm text-sand/50">Since day one in Migori</p>
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ const Footer = () => {
                 &copy; {currentYear} Kione Hardware & General Stores. All rights
                 reserved.
               </p>
-              <p className="mt-1">Located in Nairobi, Kenya</p>
+              <p className="mt-1">Located in Migori, Kenya</p>
             </div>
           </div>
         </div>

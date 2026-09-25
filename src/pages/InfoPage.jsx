@@ -5,12 +5,12 @@ const pageContent = {
     title: "About Kione Hardware",
     intro:
       "A dependable local source for building materials, tools, finishes, and everyday essentials.",
-    body: "Kione Hardware serves customers across Nairobi and beyond with practical products, clear pricing, and personal service. Browse our catalogue online and contact us when you need help choosing the right item.",
+    body: "Kione Hardware serves customers across Migori and beyond with practical products, clear pricing, and personal service. Browse our catalogue online and contact us when you need help choosing the right item.",
   },
   contact: {
     title: "Contact Us",
     intro: "We are here to help with products, orders, and delivery questions.",
-    body: "Visit us in Nairobi, Kenya, call 0712 437 715, or email info@kionehardware.com. Our team is available Monday to Saturday, 8AM to 7PM.",
+    body: "Visit us in Migori, Kenya, call 0712 437 715, or email info@kionehardware.com. Our team is available Monday to Saturday, 8AM to 7PM.",
   },
   faq: {
     title: "Frequently Asked Questions",

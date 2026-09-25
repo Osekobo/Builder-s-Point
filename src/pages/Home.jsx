@@ -212,7 +212,7 @@ const Home = () => {
     "General Store",
     "Secure M-Pesa Payment",
     "Trusted Since Day One",
-    "Nairobi, Kenya",
+    "Migori, Kenya",
   ];
 
   const categoryMeta = {
