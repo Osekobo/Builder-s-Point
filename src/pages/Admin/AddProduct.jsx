@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AddProduct.css";
 import toast from "react-hot-toast";
+import { FaCube, FaImage } from "react-icons/fa6";
 import api from "../../api/client";
 import { logError } from "../../utils/logger";
 
@@ -56,9 +57,11 @@ const AddProduct = () => {
 
     if (!formData.price) {
       newErrors.price = "Price is required";
-    } else if (parseFloat(formData.price) <= 0) {
+    } else if (!Number.isFinite(Number(formData.price))) {
+      newErrors.price = "Please enter a valid price";
+    } else if (Number(formData.price) <= 0) {
       newErrors.price = "Price must be greater than 0";
-    } else if (parseFloat(formData.price) > 1000000) {
+    } else if (Number(formData.price) > 1000000) {
       newErrors.price = "Price must be less than 1,000,000";
     }
 
@@ -68,10 +71,17 @@ const AddProduct = () => {
 
     if (!formData.stock) {
       newErrors.stock = "Stock quantity is required";
-    } else if (parseInt(formData.stock) < 0) {
+    } else if (!Number.isInteger(Number(formData.stock))) {
+      newErrors.stock = "Please enter a whole stock quantity";
+    } else if (Number(formData.stock) < 0) {
       newErrors.stock = "Stock cannot be negative";
-    } else if (parseInt(formData.stock) > 999999) {
+    } else if (Number(formData.stock) > 999999) {
       newErrors.stock = "Stock quantity is too high";
+    }
+
+    const rating = Number(formData.rating);
+    if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
+      newErrors.rating = "Rating must be between 0 and 5";
     }
 
     if (!selectedFile) {
@@ -93,7 +103,7 @@ const AddProduct = () => {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleInputChange = (e) => {
@@ -127,9 +137,12 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      const firstError = Object.keys(errors)[0];
-      const errorElement = document.querySelector(`[name="${firstError}"]`);
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      const firstError = Object.keys(validationErrors)[0];
+      const errorElement = document.querySelector(
+        `[name="${firstError}"], [name="product-image"]`,
+      );
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -220,10 +233,21 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="add-product-container">
+    <div className="add-product-container min-h-screen bg-warm">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-terra border-4 border-black shadow-hard-sm mb-4">
+          <FaCube className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="font-h text-3xl md:text-4xl font-bold text-black uppercase mb-2">
+          Add New Product
+        </h1>
+        <div className="brick-line mx-auto"></div>
+        <p className="text-ash mt-2">Create a new product for your store</p>
+      </div>
+
       <div className="add-product-card">
         <div className="card-header">
-          <h2>Add New Product</h2>
+          <h2>Product Details</h2>
           <p>Fill in the product details below</p>
         </div>
 
@@ -255,19 +279,22 @@ const AddProduct = () => {
 
             <div className="form-group">
               <label htmlFor="price">
-                Price ($) <span className="required">*</span>
+                Price (KSh) <span className="required">*</span>
               </label>
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
-                className={errors.price ? "error" : ""}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-              />
+              <div className="price-input">
+                <span className="price-prefix">KSh</span>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleInputChange}
+                  className={errors.price ? "error" : ""}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                />
+              </div>
               {errors.price && (
                 <span className="error-message">{errors.price}</span>
               )}
@@ -368,6 +395,9 @@ const AddProduct = () => {
                 max="5"
               />
               <small>Optional - Default is 0</small>
+              {errors.rating && (
+                <span className="error-message">{errors.rating}</span>
+              )}
             </div>
           </div>
 
@@ -406,7 +436,7 @@ const AddProduct = () => {
                     document.getElementById("product-image").click()
                   }
                 >
-                  <div className="upload-icon">📸</div>
+                  <FaImage className="upload-icon" />
                   <p>Click to upload product image</p>
                   <small>
                     Supported formats: JPEG, PNG, GIF, WEBP (Max 5MB)

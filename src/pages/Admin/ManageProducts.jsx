@@ -6,7 +6,7 @@ import {
   FaTrash,
   FaPlus,
   FaCube,
-  FaDollarSign,
+  FaTag,
   FaBagShopping,
   FaMagnifyingGlass,
   FaRotate,
@@ -14,6 +14,7 @@ import {
 import api from "../../api/client";
 import { getImageUrl } from "../../utils/image";
 import { logError } from "../../utils/logger";
+import ConfirmModal from "../../components/Common/ConfirmModal";
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -24,6 +25,8 @@ const ManageProducts = () => {
   const [categories, setCategories] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
@@ -114,26 +117,31 @@ const ManageProducts = () => {
     filterProducts();
   }, [filterProducts]);
 
-  const handleDelete = async (id, name) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete "${name}"? This action cannot be undone.`,
-      )
-    ) {
-      try {
-        await api.delete(`/products/${id}`);
-        toast.success("Product deleted successfully!");
-        fetchProducts();
-      } catch (error) {
-        logError("Error deleting product:", error);
-        let errorMessage = "Failed to delete product";
-        if (error.response?.status === 401) {
-          errorMessage = "Please login to delete products";
-        } else if (error.response?.data?.detail) {
-          errorMessage = error.response.data.detail;
-        }
-        toast.error(errorMessage);
+  const handleDelete = (product) => {
+    setProductToDelete(product);
+  };
+
+  const confirmDelete = async () => {
+    if (!productToDelete || isDeleting) return;
+
+    setIsDeleting(true);
+
+    try {
+      await api.delete(`/products/${productToDelete.id}`);
+      toast.success("Product deleted successfully!");
+      setProductToDelete(null);
+      await fetchProducts();
+    } catch (error) {
+      logError("Error deleting product:", error);
+      let errorMessage = "Failed to delete product";
+      if (error.response?.status === 401) {
+        errorMessage = "Please login to delete products";
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
       }
+      toast.error(errorMessage);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -355,7 +363,7 @@ const ManageProducts = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center space-x-1">
-                          <FaDollarSign className="w-4 h-4 text-terra" />
+                          <FaTag className="w-4 h-4 text-terra" />
                           <span className="text-sm font-bold text-terra">
                             KSh {product.price?.toLocaleString() || 0}
                           </span>
@@ -378,9 +386,7 @@ const ManageProducts = () => {
                             <FaPenToSquare className="w-5 h-5" />
                           </Link>
                           <button
-                            onClick={() =>
-                              handleDelete(product.id, product.name)
-                            }
+                            onClick={() => handleDelete(product)}
                             className="text-red-600 hover:text-red-700 transition-colors"
                             title="Delete Product"
                           >
@@ -417,7 +423,7 @@ const ManageProducts = () => {
             </p>
           </div>
           <div className="bg-white border-4 border-black shadow-hard-sm p-4 text-center">
-            <FaDollarSign className="w-6 h-6 text-terra mx-auto mb-2" />
+            <FaTag className="w-6 h-6 text-terra mx-auto mb-2" />
             <p className="text-ash text-xs uppercase tracking-wider">
               Inventory Value
             </p>
@@ -436,6 +442,20 @@ const ManageProducts = () => {
             {searchTerm && ` matching "${searchTerm}"`}
           </p>
         </div>
+
+        <ConfirmModal
+          isOpen={Boolean(productToDelete)}
+          title="Delete Product"
+          message={
+            productToDelete
+              ? `Are you sure you want to delete "${productToDelete.name}"? This action cannot be undone.`
+              : ""
+          }
+          confirmLabel="Delete Product"
+          isLoading={isDeleting}
+          onConfirm={confirmDelete}
+          onCancel={() => setProductToDelete(null)}
+        />
       </div>
     </div>
   );

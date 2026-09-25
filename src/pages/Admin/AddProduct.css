@@ -1,31 +1,37 @@
 .add-product-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  min-height: 100vh;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  background: var(--c-warm);
 }
 
 .add-product-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border: 4px solid var(--c-black);
+  box-shadow: 8px 8px 0 var(--c-terra);
   overflow: hidden;
 }
 
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1.5rem;
+  background: var(--c-terra);
+  color: #fff;
+  padding: 2rem;
+  border-bottom: 4px solid var(--c-black);
   text-align: center;
 }
 
 .card-header h2 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.8rem;
+  margin: 0 0 0.5rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .card-header p {
   margin: 0;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .product-form {
@@ -46,64 +52,89 @@
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: #333;
+  color: var(--c-black);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .required {
-  color: #e74c3c;
+  color: #dc2626;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  border: 2px solid var(--c-black);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--c-black);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--c-terra);
+  box-shadow: 0 0 0 3px rgba(190, 116, 81, 0.2);
 }
 
 .form-group input.error,
 .form-group select.error,
 .form-group textarea.error {
-  border-color: #e74c3c;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.price-input {
+  position: relative;
+}
+
+.price-input input {
+  padding-left: 4.5rem;
+}
+
+.price-prefix {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  z-index: 1;
+  color: var(--c-terra);
+  font-weight: 700;
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .error-message {
-  color: #e74c3c;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
   display: block;
+  margin-top: 0.35rem;
+  color: #dc2626;
+  font-size: 0.875rem;
 }
 
 .char-count {
   display: block;
-  text-align: right;
+  margin-top: 0.3rem;
+  color: var(--c-ash);
   font-size: 0.75rem;
-  color: #666;
-  margin-top: 0.25rem;
+  text-align: right;
 }
 
 .alert {
+  margin: 1.5rem 2rem 0;
   padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 2rem;
+  border-radius: 0.75rem;
 }
 
 .alert-error {
-  background-color: #fee;
-  color: #c33;
-  border: 1px solid #fcc;
+  border: 2px solid #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
 }
 
 .image-upload-area {
@@ -111,31 +142,39 @@
 }
 
 .image-upload-placeholder {
-  border: 2px dashed #ccc;
-  border-radius: 8px;
   padding: 2rem;
+  border: 3px dashed var(--c-black);
+  border-radius: 0.75rem;
+  background: var(--c-warm);
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .image-upload-placeholder:hover {
-  border-color: #667eea;
-  background-color: #f8f9ff;
+  border-color: var(--c-terra);
+  background: rgba(190, 116, 81, 0.1);
 }
 
 .upload-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 0.75rem;
+  color: var(--c-terra);
+  font-size: 1.75rem;
 }
 
 .image-upload-placeholder p {
-  margin: 0 0 0.5rem 0;
-  color: #333;
+  margin: 0 0 0.5rem;
+  color: var(--c-black);
+  font-weight: 700;
 }
 
 .image-upload-placeholder small {
-  color: #666;
+  color: var(--c-ash);
 }
 
 .image-preview {
@@ -144,33 +183,37 @@
 }
 
 .image-preview img {
-  max-width: 200px;
-  max-height: 200px;
-  border-radius: 8px;
-  border: 2px solid #e0e0e0;
+  max-width: 220px;
+  max-height: 220px;
+  border: 3px solid var(--c-black);
+  border-radius: 0.75rem;
+  object-fit: cover;
 }
 
 .remove-image-btn {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  font-size: 1.2rem;
+  top: -0.75rem;
+  right: -0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--c-black);
+  border-radius: 9999px;
+  background: #dc2626;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  box-shadow: 3px 3px 0 var(--c-black);
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .remove-image-btn:hover {
-  background-color: #c0392b;
-  transform: scale(1.1);
+  background: #b91c1c;
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 .upload-progress {
@@ -179,94 +222,113 @@
 
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background-color: #f0f0f0;
-  border-radius: 4px;
+  height: 0.5rem;
   overflow: hidden;
+  border-radius: 9999px;
+  background: #e5e7eb;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: var(--c-terra);
   transition: width 0.3s ease;
+}
+
+.upload-progress > span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--c-ash);
+  font-size: 0.8rem;
 }
 
 .form-actions {
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
+  gap: 1rem;
   margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--c-black);
 }
 
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
+  border: 4px solid var(--c-black);
+  border-radius: 0.75rem;
+  color: #fff;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  box-shadow: 4px 4px 0 var(--c-black);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: translate(2px, 2px);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--c-terra);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 .btn-secondary {
-  background-color: #6c757d;
-  color: white;
+  background: #d1d5db;
+  color: var(--c-black);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #5a6268;
+  background: #9ca3af;
+  transform: translate(2px, 2px);
+  box-shadow: none;
 }
 
 .spinner {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
   border-radius: 50%;
-  border-top-color: white;
   animation: spin 0.6s linear infinite;
-  margin-right: 0.5rem;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
   .add-product-container {
-    margin: 1rem auto;
+    margin: 1.5rem auto;
   }
-  
+
   .product-form {
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
   }
-  
+
   .form-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
   }
-  
+
   .btn {
     width: 100%;
   }

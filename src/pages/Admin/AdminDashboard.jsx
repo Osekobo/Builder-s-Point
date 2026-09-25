@@ -4,7 +4,7 @@ import api from '../../api/client';
 import { logError } from '../../utils/logger';
 import {
   FaCube, FaCirclePlus, FaList, FaBagShopping, FaUsers,
-  FaArrowTrendUp, FaDollarSign, FaShieldHalved, FaTriangleExclamation,
+  FaArrowTrendUp, FaTag, FaShieldHalved, FaTriangleExclamation,
   FaCircleXmark, FaCalendarDays, FaEye, FaRotate, FaUser, FaUserXmark
 } from 'react-icons/fa6';
 
@@ -101,7 +101,7 @@ const AdminDashboard = () => {
   const statCards = [
     { title: 'Total Products', value: stats.totalProducts, icon: FaCube, color: 'bg-terra' },
     { title: 'Total Orders', value: stats.totalOrders, icon: FaBagShopping, color: 'bg-terra' },
-    { title: 'Total Revenue', value: formatMoney(stats.totalRevenue), icon: FaDollarSign, color: 'bg-terra' },
+    { title: 'Total Revenue', value: formatMoney(stats.totalRevenue), icon: FaTag, color: 'bg-terra' },
     { title: 'Total Users', value: stats.totalUsers, icon: FaUsers, color: 'bg-terra' },
     { title: 'Cancelled Orders', value: stats.cancelledOrders.length, icon: FaCircleXmark, color: 'bg-red-600' },
     { title: 'Low Stock Items', value: stats.lowStockProducts.length, icon: FaTriangleExclamation, color: 'bg-orange-600' },

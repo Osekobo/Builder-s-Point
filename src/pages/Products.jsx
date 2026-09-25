@@ -324,7 +324,7 @@ const Products = () => {
                   <div className="flex space-x-2">
                     <input
                       type="number"
-                      placeholder="Min"
+                       placeholder="Min KSh"
                       value={priceRange.min}
                       onChange={(e) =>
                         setPriceRange({
@@ -336,7 +336,7 @@ const Products = () => {
                     />
                     <input
                       type="number"
-                      placeholder="Max"
+                       placeholder="Max KSh"
                       value={priceRange.max}
                       onChange={(e) =>
                         setPriceRange({
@@ -387,7 +387,7 @@ const Products = () => {
                         className="inline-flex items-center space-x-1 px-2 py-1 bg-terra/10 text-terra border border-terra text-sm"
                       >
                         <span>
-                          Price: KSh {priceRange.min} - {priceRange.max}
+                           Price: KSh {priceRange.min} - KSh {priceRange.max}
                         </span>
 
                       </button>
