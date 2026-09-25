@@ -126,7 +126,7 @@ const AdminDashboard = () => {
       title: 'View Orders',
       description: 'Manage customer orders',
       icon: FaBagShopping,
-      link: '/orders',
+      link: '/admin/orders',
       color: 'bg-terra'
     },
     {
@@ -359,7 +359,7 @@ const AdminDashboard = () => {
                 <FaBagShopping className="mr-2 text-terra" />
                 Recent Active Orders
               </h2>
-              <Link to="/orders" className="text-terra hover:text-terra-dark text-sm font-bold uppercase tracking-wider transition-colors">
+              <Link to="/admin/orders" className="text-terra hover:text-terra-dark text-sm font-bold uppercase tracking-wider transition-colors">
                 View All
               </Link>
             </div>

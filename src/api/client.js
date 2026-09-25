@@ -6,6 +6,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const isAdminRequest = (config) => {
+  const url = config?.url || "";
+  const method = (config?.method || "get").toLowerCase();
+
+  if (url.includes("/admin")) return true;
+  return url.includes("/products") && method !== "get";
+};
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -13,8 +21,12 @@ api.interceptors.response.use(
     const url = error.config?.url || "";
     const isAuthEndpoint = url.includes("/auth/");
 
-    if (status === 401 && !isAuthEndpoint) {
+    if (typeof window !== "undefined" && status === 401 && !isAuthEndpoint) {
       window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+    }
+
+    if (typeof window !== "undefined" && status === 403 && isAdminRequest(error.config)) {
+      window.dispatchEvent(new CustomEvent("auth:forbidden"));
     }
 
     return Promise.reject(error);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import useAuthStore from '../store/authStore';
 import { getMe } from '../api/auth';
+import { getUserFromResponse, isAdminUser } from '../utils/auth';
 import { logError } from '../utils/logger';
 import {
   FaUser,
@@ -15,7 +16,7 @@ import {
 } from 'react-icons/fa6';
 
 const Account = () => {
-  const { user, updateUser } = useAuthStore();
+  const { user, updateUser, clearAuth } = useAuthStore();
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({
     total_orders: 0,
@@ -30,20 +31,24 @@ const Account = () => {
     setHasError(false);
     try {
       const response = await getMe();
-      setProfile(response.data);
+      const profileUser = getUserFromResponse(response.data);
+      if (!profileUser) throw new Error('Invalid user profile response');
+
+      setProfile(profileUser);
       setStats({
-        total_orders: response.data.total_orders ?? 0,
-        items_purchased: response.data.items_purchased ?? 0,
-        active_orders: response.data.active_orders ?? 0,
+        total_orders: profileUser.total_orders ?? 0,
+        items_purchased: profileUser.items_purchased ?? 0,
+        active_orders: profileUser.active_orders ?? 0,
       });
-      updateUser({ ...response.data });
+      updateUser(profileUser);
     } catch (error) {
       logError('Failed to fetch profile:', error);
+      if (error?.response?.status === 401) clearAuth();
       setHasError(true);
     } finally {
       setIsLoading(false);
     }
-  }, [updateUser]);
+  }, [clearAuth, updateUser]);
 
   useEffect(() => {
     fetchProfile();
@@ -117,7 +122,7 @@ const Account = () => {
                 <div>
                   <p className="text-xs text-ash uppercase tracking-wider">Account Status</p>
                   <p className="font-h font-bold text-green-600">
-                    {isLoading ? '...' : displayUser?.is_admin ? 'Administrator' : 'Customer'}
+                    {isLoading ? '...' : isAdminUser(displayUser) ? 'Administrator' : 'Customer'}
                   </p>
                 </div>
               </div>

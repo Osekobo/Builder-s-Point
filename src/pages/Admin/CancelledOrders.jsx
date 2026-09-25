@@ -50,7 +50,7 @@ const CancelledOrders = () => {
     <div className="min-h-screen bg-warm py-8 px-4">
       <div className="container mx-auto max-w-7xl">
         <div className="mb-8">
-          <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-4">
+            <Link to="/admin" className="inline-flex items-center gap-2 text-terra hover:text-terra-dark mb-4">
             <FaArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </Link>

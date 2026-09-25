@@ -1,7 +1,8 @@
 import api from "./client";
 
 export const createOrder = (payload) => api.post("/orders/create", payload);
-export const getOrders = () => api.get("/orders");
+export const getOrders = () => api.get("/orders/");
+export const getAllOrders = () => api.get("/orders/admin/all");
 export const getOrderDetails = (orderId) => api.get(`/orders/${orderId}`);
 export const cancelOrder = (orderId) =>
   api.post(`/orders/${orderId}/cancel`);

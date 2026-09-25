@@ -8,7 +8,7 @@ import {
 import { lazy, Suspense, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import Layout from "./components/Layout/Layout";
-import ProtectedRoute from "./components/Common/ProtectedRoute";
+import ProtectedRoute, { PublicOnlyRoute } from "./components/Common/ProtectedRoute";
 import Loading from "./components/Common/Loading";
 import useAuthStore from "./store/authStore";
 
@@ -26,6 +26,7 @@ const AddProduct = lazy(() => import("./pages/Admin/AddProduct"));
 const EditProduct = lazy(() => import("./pages/Admin/EditProduct"));
 const ManageProducts = lazy(() => import("./pages/Admin/ManageProducts"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
+const AdminOrders = lazy(() => import("./pages/Admin/AdminOrders"));
 const CancelledOrders = lazy(() => import("./pages/Admin/CancelledOrders"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -53,9 +54,19 @@ const AuthRedirect = () => {
         navigate("/login", { replace: true });
       }
     };
+    const handleForbidden = () => {
+      if (pathname.startsWith("/admin")) {
+        toast.error("You do not have permission to access this page.");
+        navigate("/403", { replace: true });
+      }
+    };
     window.addEventListener("auth:unauthorized", handleExpiredSession);
-    return () =>
+    window.addEventListener("auth:forbidden", handleForbidden);
+
+    return () => {
       window.removeEventListener("auth:unauthorized", handleExpiredSession);
+      window.removeEventListener("auth:forbidden", handleForbidden);
+    };
   }, [navigate, pathname]);
 
   return null;
@@ -105,8 +116,22 @@ function App() {
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
+              }
+            />
             <Route path="/403" element={<Forbidden />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
@@ -181,6 +206,14 @@ function App() {
               element={
                 <ProtectedRoute adminOnly>
                   <EditProduct />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminOrders />
                 </ProtectedRoute>
               }
             />

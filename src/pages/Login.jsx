@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
+import { getPostLoginPath } from '../utils/auth';
 import { FaEnvelope, FaLock, FaArrowRightToBracket, FaShieldHalved } from 'react-icons/fa6';
 
 const Login = () => {
@@ -18,7 +19,9 @@ const Login = () => {
     e.preventDefault();
     const result = await login(email, password);
     if (result.success) {
-      navigate(location.state?.from || "/");
+      navigate(getPostLoginPath(result.user, location.state?.from), {
+        replace: true,
+      });
     }
   };
 

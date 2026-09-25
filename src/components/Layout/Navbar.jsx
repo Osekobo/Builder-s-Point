@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
+import { isAdminUser } from "../../utils/auth";
 import useCartStore from "../../store/cartStore";
 import {
   FaCartShopping,
@@ -21,6 +22,7 @@ import { useState, useEffect, useRef } from "react";
 
 const Navbar = () => {
   const { user, logout } = useAuthStore();
+  const isAdmin = isAdminUser(user);
   const { items } = useCartStore();
   const navigate = useNavigate();
   const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
@@ -182,7 +184,7 @@ const Navbar = () => {
               )}
 
               
-              {user?.is_admin && (
+              {isAdmin && (
                 <div className="relative">
                   <button
                     onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
@@ -235,7 +237,7 @@ const Navbar = () => {
                         </Link>
                         <hr className="my-1 border-black" />
                         <Link
-                          to="/orders"
+                          to="/admin/orders"
                           className="block px-4 py-2 text-black hover:bg-terra/10 hover:text-terra transition-colors"
                           onClick={() => setIsAdminMenuOpen(false)}
                         >
@@ -402,7 +404,7 @@ const Navbar = () => {
 
                 <hr className="my-2 border-black" />
 
-                {user.is_admin && (
+                {isAdmin && (
                   <>
                     
                     <div className="px-4 py-2 text-xs font-semibold text-ash uppercase tracking-wider">
@@ -435,7 +437,16 @@ const Navbar = () => {
                       <FaList className="w-5 h-5" />
                       <span className="font-semibold">Manage Products</span>
                     </Link>
-                  </>
+
+                    <Link
+                      to="/admin/orders"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center space-x-3 px-4 py-3 text-black border-2 border-transparent hover:bg-terra/10 hover:text-terra hover:border-terra transition-all"
+                    >
+                      <FaBagShopping className="w-5 h-5" />
+                      <span className="font-semibold">All Orders</span>
+                    </Link>
+                   </>
                 )}
 
                 <hr className="my-2 border-black" />
